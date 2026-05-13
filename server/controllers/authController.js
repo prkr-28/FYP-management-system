@@ -6,7 +6,7 @@ export const registerUser = asyncHandler(async (req, res, next) => {
     try {
         const { name, email, password } = req.body;
         if (!name || !email || !password) {
-            return next(new ErrorHandler('Please provide name, email and password', 400));
+            return next(new ErrorHandler('Please fill all the fields', 400));
         }
         const existingUser = await userModel.findOne({ email });
         if (existingUser) {
