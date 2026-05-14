@@ -6,31 +6,49 @@ class ErrorHandler extends Error {
 }
 
 export const errorMiddleware = (err, req, res, next) => {
-    err.message = err.message || 'Internal Server Error';
+
+    err.message = err.message || "Internal Server Error";
     err.statusCode = err.statusCode || 500;
 
+    // Duplicate key
     if (err.code === 11000) {
         const message = `Duplicate ${Object.keys(err.keyValue)} entered`;
         err = new ErrorHandler(message, 400);
     }
 
-    if (err.name === 'ValidationError') {
-        const message = "JSON web token is invalid, try again";
-        err = new ErrorHandler(message, 400);
-    }
-    if (err.name === 'TokenExpiredError') {
-        const message = "JSON web token is expired, try again";
-        err = new ErrorHandler(message, 400);
-    }
-    if (err.name === 'CastError') {
-        const message = "Invalid ID format";
+    // Mongoose validation
+    if (err.name === "ValidationError") {
+        const message = Object.values(err.errors)
+            .map(val => val.message)
+            .join(", ");
+
         err = new ErrorHandler(message, 400);
     }
 
-    const errorMessage = err.errors ? Object.values(err.errors).map(value => value.message).join(', ') : err.message;
+    // JWT invalid
+    if (err.name === "JsonWebTokenError") {
+        err = new ErrorHandler(
+            "JSON web token is invalid, try again",
+            400
+        );
+    }
+
+    // JWT expired
+    if (err.name === "TokenExpiredError") {
+        err = new ErrorHandler(
+            "JSON web token is expired, try again",
+            400
+        );
+    }
+
+    // Invalid ObjectId
+    if (err.name === "CastError") {
+        err = new ErrorHandler("Invalid ID format", 400);
+    }
+
     return res.status(err.statusCode).json({
         success: false,
-        message: errorMessage
+        message: err.message,
     });
 };
 
