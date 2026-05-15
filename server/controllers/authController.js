@@ -3,6 +3,7 @@ import ErrorHandler from "../middlewares/error.js";
 import { User } from "../models/userModel.js";
 import { getResetPasswordEmailTemplate } from "../utils/emailTemplates.js";
 import { generateToken } from "../utils/generateToken.js";
+import crypto from 'crypto';
 
 
 export const registerUser = asyncHandler(async (req, res, next) => {
@@ -79,4 +80,25 @@ export const forgetPassword = asyncHandler(async (req, res, next) => {
         return next(new ErrorHandler('Email not sent', 500));
     }
 });
-export const resetPassword = asyncHandler(async (req, res, next) => { });
+export const resetPassword = asyncHandler(async (req, res, next) => {
+    const { token } = req.params;
+    const resetPasswordToken = crypto.createHash('sha256').update(token).digest('hex');
+    const user = await User.findOne({
+        resetPasswordToken,
+        resetPasswordExpire: { $gt: Date.now() }
+    });
+    if (!user) {
+        return next(new ErrorHandler('Invalid or expired token', 400));
+    }
+    if (!req.body.password || !req.body.confirmPassword) {
+        return next(new ErrorHandler('Please fill all the fields', 400));
+    }
+    if (req.body.password !== req.body.confirmPassword) {
+        return next(new ErrorHandler('Password and confirm password do not match', 400));
+    }
+    user.password = req.body.password;
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpire = undefined;
+    await user.save();
+    generateToken(user, 200, 'Password reset successfully', res);
+});
