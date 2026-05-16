@@ -1,6 +1,7 @@
 import { asyncHandler } from "../middlewares/assyncHandler.js";
 import ErrorHandler from "../middlewares/error.js";
 import { User } from "../models/userModel.js";
+import { sendEmail } from "../services/mailService.js";
 import { getResetPasswordEmailTemplate } from "../utils/emailTemplates.js";
 import { generateToken } from "../utils/generateToken.js";
 import crypto from 'crypto';
@@ -64,16 +65,17 @@ export const forgetPassword = asyncHandler(async (req, res, next) => {
 
     const message = getResetPasswordEmailTemplate(resetPasswordUrl);
     try {
-        await sendEmail({
-            to: user.email,
-            subject: "FYP SYSYTEM - Password Reset Request",
+        await sendEmail(
+            user.email,
+            "FYP SYSTEM - Password Reset Request",
             message
-        });
+        );
         res.status(200).json({
             success: true,
             message: `Email sent to ${user.email} successfully`
         });
     } catch (error) {
+        //console.log(error);
         user.resetPasswordToken = undefined;
         user.resetPasswordExpire = undefined;
         await user.save({ validateBeforeSave: false });

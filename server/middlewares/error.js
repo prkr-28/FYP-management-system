@@ -46,6 +46,8 @@ export const errorMiddleware = (err, req, res, next) => {
         err = new ErrorHandler("Invalid ID format", 400);
     }
 
+    console.log(err);
+
     return res.status(err.statusCode).json({
         success: false,
         message: err.message,

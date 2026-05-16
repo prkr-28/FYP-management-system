@@ -55,12 +55,13 @@ const LoginPage = () => {
     return;
   }
 
-    const data = new FormData();
-    data.append("email", formData.email);
-    data.append("password", formData.password);
-    data.append("role", formData.role);
-
-    dispatch(login(data));
+    dispatch(
+  login({
+    email: formData.email,
+    password: formData.password,
+    role: formData.role,
+  })
+);
   };
 
   useEffect(() => {

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { Mail, ArrowLeft, CheckCircle } from "lucide-react";
+import { forgotPassword } from "../../store/slices/authSlice";
 
 const ForgotPasswordPage = () => {
   const [email, setEmail] = useState("");
@@ -18,8 +19,10 @@ const ForgotPasswordPage = () => {
       setError("Email is required");
       return;
     }
-    if (!/\S+@\S+\.\S+/.test(email)) {
-      setError("Email is invalid");
+    // Basic email format validation
+    const emailRegex = /\S+@\S+\.\S+/;
+    if (!emailRegex.test(email)) {
+      setError("Please enter a valid email address");
       return;
     }
 
@@ -28,7 +31,7 @@ const ForgotPasswordPage = () => {
     
     try {
       // Simulate API call or use your actual dispatch
-      // await dispatch(forgetPassword({ email })).unwrap();
+      await dispatch(forgotPassword(email)).unwrap();
       
       setIsLoading(false);
       setIsSuccess(true);
@@ -103,6 +106,7 @@ const ForgotPasswordPage = () => {
                   setEmail(e.target.value);
                   if (error) setError(null);
                 }}
+                disabled={isLoading || isRequestingForToken}
                 className={`w-full pl-11 pr-4 py-3 bg-slate-50 border ${
                   error ? "border-red-500" : "border-slate-200"
                 } text-slate-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-colors`}
@@ -113,12 +117,12 @@ const ForgotPasswordPage = () => {
 
           <button
             type="submit"
-            disabled={isLoading}
+            disabled={isLoading || isRequestingForToken}
             className={`w-full py-3.5 px-4 bg-[#7A5AF8] text-white text-base font-semibold rounded-xl hover:bg-[#6849E8] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#7A5AF8] transition-colors ${
-              isLoading ? "opacity-70 cursor-not-allowed" : ""
+              (isLoading||isRequestingForToken) ? "opacity-70 cursor-not-allowed" : ""
             }`}
           >
-            {isLoading ? "Sending..." : "Reset password"}
+            {(isLoading||isRequestingForToken) ? "Sending..." : "Send reset link"}
           </button>
         </form>
 
