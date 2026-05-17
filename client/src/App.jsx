@@ -53,13 +53,12 @@ const App = () => {
   }
   return (
     <BrowserRouter>
-      <ToastContainer />
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
       </Routes>
-      <ToastContainer theme="light" />
+       <ToastContainer theme="light" position="top-right" autoClose={3000} />
     </BrowserRouter>
   );
 };
