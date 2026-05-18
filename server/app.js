@@ -7,6 +7,7 @@ import rateLimit from 'express-rate-limit';
 import { errorMiddleware } from './middlewares/error.js';
 dotenv.config();
 import authRoutes from './routes/userRoutes.js';
+import adminRoutes from './routes/adminRoutes.js';
 
 const app = express();
 
@@ -29,6 +30,7 @@ app.use(express.json());
 app.use(cookiesParser());
 app.use(express.urlencoded({ extended: true }));
 app.use("/api/v1/auth", authRoutes);
+app.use("/api/v1/admin", adminRoutes);
 
 
 app.use(errorMiddleware);

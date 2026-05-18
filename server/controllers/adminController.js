@@ -1,3 +1,49 @@
 import { asyncHandler } from "../middlewares/assyncHandler.js";
 import ErrorHandler from "../middlewares/error.js";
 import { User } from "../models/userModel.js";
+import * as userServices from "../services/userServices.js";
+
+export const createStudent = asyncHandler(async (req, res, next) => {
+    const { name, email, password, department } = req.body;
+    if (!name || !email || !password || !department) {
+        return next(new ErrorHandler("Please fill all the fields", 400));
+    }
+    const user = await userServices.createUser({ name, email, password, department, role: "student" });
+    res.status(201).json({
+        success: true,
+        message: "Student created successfully",
+        data: { user }
+    });
+});
+
+export const updateStudent = asyncHandler(async (req, res, next) => {
+    const { id } = req.params;
+    const updateData = { ...req.body };
+    delete updateData.role; // Prevent role from being updated
+
+    const user = await userServices.updateUser(id, updateData);
+    if (!user) {
+        return next(new ErrorHandler("Student not found", 404));
+    }
+    res.status(200).json({
+        success: true,
+        message: "Student updated successfully",
+        data: { user }
+    });
+});
+
+export const deleteStudent = asyncHandler(async (req, res, next) => {
+    const { id } = req.params;
+    const user = await userServices.getUserById(id);
+    if (!user) {
+        return next(new ErrorHandler("Student not found", 404));
+    }
+    if (user.role !== "student") {
+        return next(new ErrorHandler("User is not a student", 400));
+    }
+    await userServices.deleteUser(id);
+    res.status(200).json({
+        success: true,
+        message: "Student deleted successfully"
+    });
+});
