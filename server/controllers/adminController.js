@@ -47,3 +47,28 @@ export const deleteStudent = asyncHandler(async (req, res, next) => {
         message: "Student deleted successfully"
     });
 });
+
+export const createTeacher = asyncHandler(async (req, res, next) => {
+    const { name, email, password, department, maxStudents, experties } = req.body;
+    if (!name || !email || !password || !department || !maxStudents || !experties) {
+        return next(new ErrorHandler("Please fill all the fields", 400));
+    }
+    const user = await userServices.createUser({
+        name,
+        email,
+        password,
+        department,
+        maxStudents,
+        experties: Array.isArray(experties)
+            ? experties
+            : typeof experties === "string" && experties.trim() != ""
+                ? experties.split(",").map((s) => s.trim())
+                : [],
+        role: "teacher"
+    });
+    res.status(201).json({
+        success: true,
+        message: "Teacher created successfully",
+        data: { user }
+    });
+});
