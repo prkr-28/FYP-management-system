@@ -34,3 +34,13 @@ export const deleteUser = async (userId) => {
         throw new Error("Error deleting user: " + error.message);
     }
 }
+
+export const getAllUsers = async () => {
+    try {
+        const query = { role: { $in: ["Admin"] } };
+        const users = await User.find(query).select('-password -resetPasswordToken -resetPasswordExpire').sort({ createdAt: -1 });
+        return { users };
+    } catch (error) {
+        throw new Error("Error fetching users: " + error.message);
+    }
+}
