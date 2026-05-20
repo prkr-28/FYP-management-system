@@ -44,6 +44,18 @@ const App = () => {
     dispatch(getUser());
   }, [dispatch]);
 
+  //protecting dashboard routes...
+  const protectedRoute = ({children,allowedRoles}) => {
+    if (!authUser) {
+      return <Navigate to="/login" />;
+    }
+    if (allowedRoles?.length && authUser?.user && !allowedRoles.includes(authUser.role)) {
+      const redirectPath = authUser.role === "Admin" ? "/admin" : authUser.role === "Teacher" ? "/teacher" : "/student";
+      return <Navigate to={redirectPath} />;
+    }
+    return children;
+  };
+
   if(isCheckingAuth){
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -57,6 +69,19 @@ const App = () => {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
+        {/* admin routes */}
+        <Route path="/admin" element={
+          <protectedRoute allowedRoles={["Admin"]}>
+            <DashboardLayout/>
+          </protectedRoute>
+        } >
+          <Route index element={<AdminDashboard />} />
+          <Route path="students" element={<ManageStudents />} />
+          <Route path="teachers" element={<ManageTeachers />} />
+          <Route path="assign-supervisor" element={<AssignSupervisor />} />
+          <Route path="deadlines" element={<DeadlinesPage />} />
+          <Route path="projects" element={<ProjectsPage />} />
+        </Route>
       </Routes>
        <ToastContainer theme="light" position="top-right" autoClose={3000} />
     </BrowserRouter>

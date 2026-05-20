@@ -105,10 +105,14 @@ export const deleteTeacher = asyncHandler(async (req, res, next) => {
 });
 
 export const getAllUsers = asyncHandler(async (req, res, next) => {
-    const { users } = userServices.getAllUsers();
+    const users = userServices.getAllUsers();
     res.status(200).json({
         success: true,
         message: "Users fetched successfully",
         data: { users }
     });
 });
+
+export const getAllProjects = asyncHandler(async (req, res, next) => { });
+export const assignSupervisor = asyncHandler(async (req, res, next) => { });
+export const getDashBoardStats = asyncHandler(async (req, res, next) => { });
