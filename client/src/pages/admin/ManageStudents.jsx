@@ -1,14 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import AddStudent from "../../components/modal/AddStudent";
-import { getAllUsers } from "../../redux/slices/adminSlice";
-import { updateStudent ,createStudent,deleteStudent } from "../../store/slices/adminSlice";
+import {getAllUsers, updateStudent ,createStudent,deleteStudent } from "../../store/slices/adminSlice";
 import { toggleStudentModel } from "../../store/slices/popupSlice";
-import { Plus, User } from "lucide-react";
+import { CheckCircle, Plus, TriangleAlert, User } from "lucide-react";
 
 const ManageStudents = () => {
   const {users,projects} = useSelector((state) => state.admin);
-  const {isCreateStudentModelOpen} = useSelector(state.popups);
+  const {isCreateStudentModalOpen} = useSelector((state) => state.popup);
   const dispatch = useDispatch();
   const [showModel, setShowModel] = useState(false);
   const [editingStudent, setEditingStudent] = useState(null);
@@ -23,6 +22,10 @@ const ManageStudents = () => {
     department: "",
   });
 
+    useEffect(() => {
+    dispatch(getAllUsers());
+  }, [dispatch]);
+
   const students = useMemo(() => {
     const studentUsers=(users || []).filter((user) => user.role?.toLowerCase() === "student");
     return studentUsers.map((student) => {
@@ -36,10 +39,6 @@ const ManageStudents = () => {
     });
   }
   , [users, projects]);
-
-  useEffect(() => {
-    dispatch(getAllUsers());
-  }, [dispatch]);
 
   const departments = useMemo(() => {
     const deptSet = new Set((students || []).map((student) => student.department.filter(Boolean)));
@@ -100,40 +99,80 @@ const ManageStudents = () => {
     setStudentToDelete(null);
   };
 
-  return <>
-  <div className="space-y-6">
-    {/* header     */}
-    <div className="card">
-      <div className="card-header flex flex-col md:flex-row justify-between items-start md:items-center">
-        <div>
-          <h2 className="card-title">Manage Students</h2>
-        <p className="card-subtitle">
-          Add, edit, or manage students accounts
-        </p>
+  return (
+    <div className="space-y-6">
+      {/* header */}
+      <div className="card">
+        <div className="card-header flex flex-col md:flex-row justify-between items-start md:items-center">
+          <div>
+            <h2 className="card-title">Manage Students</h2>
+            <p className="card-subtitle">
+              Add, edit, or manage students accounts
+            </p>
+          </div>
+
+          <button
+            className="btn-primary flex items-center space-x-2 mt-4 md:mt-0"
+            onClick={() => dispatch(toggleStudentModel())}
+          >
+            <Plus className="w-5 h-5" />
+            <span>Add new Student</span>
+          </button>
+        </div>
+      </div>
+
+      {/* stats cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="card">
+          <div className="flex items-center">
+            <div className="p-3 bg-blue-100 rounded-lg">
+              <User className="w-6 h-6 text-blue-600" />
+            </div>
+            <div className="ml-4">
+              <p className="text-sm font-medium text-slate-600">Total Students</p>
+              <p className="text-lg font-semibold">{students.length}</p>
+            </div>
+          </div>
         </div>
 
-        <button className="btn-primary flex items-center space-x-2 mt-4 md:mt-0" onClick={() => dispatch(toggleStudentModel())}>
-          <Plus className="w-5 h-5"/>
-          <span>Add new Student</span>
-        </button>
-      </div>
-    </div>
+        <div className="card">
+          <div className="flex items-center">
+            <div className="p-3 bg-blue-100 rounded-lg">
+              <CheckCircle className="w-6 h-6 text-purple-600" />
+            </div>
+            <div className="ml-4">
+              <p className="text-sm font-medium text-slate-600">Completed Projects</p>
+              <p className="text-lg font-semibold">{students.filter((student) => student.status === "completed").length}</p>
+            </div>
+          </div>
+        </div>
 
-    {/* stats cards */}
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="card">
+          <div className="flex items-center">
+            <div className="p-3 bg-blue-100 rounded-lg">
+              <TriangleAlert className="w-6 h-6 text-yellow-600" />
+            </div>
+            <div className="ml-4">
+              <p className="text-sm font-medium text-slate-600">Unassigned</p>
+              <p className="text-lg font-semibold">{students.filter((student) => !student.supervisor).length}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* filters */}
       <div className="card">
-      <div className="flex, items-center">
-      <div className="p-3 bg-blue-100 rounded-lg">
-        <User className="w-6 h-6 text-blue-600"/>
-      </div>
-      <div className="ml-4">
-        <p className="text-sm font-medium text-slate-600">Total Students</p>
-        <p className="text-lg font-semibold">{students.length}</p>
-      </div>
+        <div className="flex flex-col md:flex-row gap-4">
+    <div className="flex-1">
+      <label className="block text-sm font-medium text-sky-700 mb-2">
+        Search Students
+      </label>
+      <input type="text" className="input-field w-full" placeholder="Search by name or email...." value={searchTerm} onChange={(e)=>setSearchTerm(e.target.value)}/>
+    </div>
+        </div>
       </div>
     </div>
-    </div>
-    </>;
+  );
 };
 
 export default ManageStudents;

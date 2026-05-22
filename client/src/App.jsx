@@ -45,7 +45,7 @@ const App = () => {
   }, [dispatch]);
 
   //protecting dashboard routes...
-  const protectedRoute = ({children,allowedRoles}) => {
+  const ProtectedRoute = ({children,allowedRoles}) => {
     if (!authUser) {
       return <Navigate to="/login" />;
     }
@@ -71,9 +71,9 @@ const App = () => {
         <Route path="/reset-password" element={<ResetPasswordPage />} />
         {/* admin routes */}
         <Route path="/admin" element={
-          <protectedRoute allowedRoles={["Admin"]}>
-            <DashboardLayout/>
-          </protectedRoute>
+          <ProtectedRoute allowedRoles={["Admin"]}>
+            <DashboardLayout userRole={"Admin"}/>
+          </ProtectedRoute>
         } >
           <Route index element={<AdminDashboard />} />
           <Route path="students" element={<ManageStudents />} />
