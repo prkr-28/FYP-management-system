@@ -37,7 +37,7 @@ export const deleteUser = async (userId) => {
 
 export const getAllUsers = async () => {
     try {
-        const query = { role: { $in: ["Admin"] } };
+        const query = { role: { $in: ["Student"] } };
         const users = await User.find(query).select('-password -resetPasswordToken -resetPasswordExpire').sort({ createdAt: -1 });
         return users;
     } catch (error) {

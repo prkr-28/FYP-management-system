@@ -105,7 +105,7 @@ export const deleteTeacher = asyncHandler(async (req, res, next) => {
 });
 
 export const getAllUsers = asyncHandler(async (req, res, next) => {
-    const users = userServices.getAllUsers();
+    const users = await userServices.getAllUsers();
     res.status(200).json({
         success: true,
         message: "Users fetched successfully",
