@@ -8,7 +8,7 @@ export const createStudent = asyncHandler(async (req, res, next) => {
     if (!name || !email || !password || !department) {
         return next(new ErrorHandler("Please fill all the fields", 400));
     }
-    const user = await userServices.createUser({ name, email, password, department, role: "student" });
+    const user = await userServices.createUser({ name, email, password, department, role: "Student" });
     res.status(201).json({
         success: true,
         message: "Student created successfully",
@@ -38,7 +38,7 @@ export const deleteStudent = asyncHandler(async (req, res, next) => {
     if (!user) {
         return next(new ErrorHandler("Student not found", 404));
     }
-    if (user.role !== "student") {
+    if (user.role !== "Student") {
         return next(new ErrorHandler("User is not a student", 400));
     }
     await userServices.deleteUser(id);
@@ -49,8 +49,8 @@ export const deleteStudent = asyncHandler(async (req, res, next) => {
 });
 
 export const createTeacher = asyncHandler(async (req, res, next) => {
-    const { name, email, password, department, maxStudents, experties } = req.body;
-    if (!name || !email || !password || !department || !maxStudents || !experties) {
+    const { name, email, password, department, maxStudents, expertise } = req.body;
+    if (!name || !email || !password || !department || !maxStudents || !expertise) {
         return next(new ErrorHandler("Please fill all the fields", 400));
     }
     const user = await userServices.createUser({
@@ -59,12 +59,12 @@ export const createTeacher = asyncHandler(async (req, res, next) => {
         password,
         department,
         maxStudents,
-        experties: Array.isArray(experties)
-            ? experties
-            : typeof experties === "string" && experties.trim() != ""
-                ? experties.split(",").map((s) => s.trim())
+        expertise: Array.isArray(expertise)
+            ? expertise
+            : typeof expertise === "string" && expertise.trim() != ""
+                ? expertise.split(",").map((s) => s.trim())
                 : [],
-        role: "teacher"
+        role: "Teacher"
     });
     res.status(201).json({
         success: true,
@@ -94,7 +94,7 @@ export const deleteTeacher = asyncHandler(async (req, res, next) => {
     if (!user) {
         return next(new ErrorHandler("Teacher not found", 404));
     }
-    if (user.role !== "teacher") {
+    if (user.role !== "Teacher") {
         return next(new ErrorHandler("User is not a teacher", 400));
     }
     await userServices.deleteUser(id);

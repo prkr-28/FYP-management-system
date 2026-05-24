@@ -8,7 +8,13 @@ import {
   deleteStudent,
 } from "../../store/slices/adminSlice.js";
 import { toggleStudentModel } from "../../store/slices/popupSlice";
-import { CheckCircle, Plus, TriangleAlert, User } from "lucide-react";
+import {
+  CheckCircle,
+  Plus,
+  TriangleAlert,
+  TriangleAlertIcon,
+  User,
+} from "lucide-react";
 
 const ManageStudents = () => {
   const { users, projects } = useSelector((state) => state.admin);
@@ -84,9 +90,6 @@ const ManageStudents = () => {
           Data: formData,
         }),
       );
-    } else {
-      // Dispatch create student action
-      dispatch(createStudent(formData));
     }
     handleCloseModel();
   };
@@ -202,7 +205,7 @@ const ManageStudents = () => {
 
             <input
               type="text"
-              className="input-field w-full"
+              className="input-field w-full p-2 ring-1 ring-slate-300 rounded-md focus:outline-none "
               placeholder="Search by name or email..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -386,13 +389,21 @@ const ManageStudents = () => {
                   >
                     <option value="">Select Department</option>
                     <option value="Computer Science">Computer Science</option>
-                    <option value="Mathematics">Software Engineering</option>
-                    <option value="Physics">Data Science</option>
-                    <option value="Physics">Electrical Engineering</option>
-                    <option value="Physics">Mechanical Engineering</option>
-                    <option value="Physics">Civil Engineering</option>
-                    <option value="Physics">Business Administration</option>
-                    <option value="Physics">Economics</option>
+                    <option value="Software Engineering">
+                      Software Engineering
+                    </option>
+                    <option value="Data Science">Data Science</option>
+                    <option value="Electrical Engineering">
+                      Electrical Engineering
+                    </option>
+                    <option value="Mechanical Engineering">
+                      Mechanical Engineering
+                    </option>
+                    <option value="Civil Engineering">Civil Engineering</option>
+                    <option value="Business Administration">
+                      Business Administration
+                    </option>
+                    <option value="Economics">Economics</option>
                     <option value="Physics"> Physics</option>
                   </select>
                 </div>
@@ -414,15 +425,23 @@ const ManageStudents = () => {
         )}
 
         {/* Delete Confirmation Modal */}
-        {showDeleteModel && (
+        {showDeleteModel && studentToDelete && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
             <div className="bg-white rounded-lg shadow-lg w-full max-w-sm p-6">
-              <h2 className="text-xl font-semibold mb-4">Confirm Deletion</h2>
-              <p className="mb-6">
+              <div className="flex flex-col items-center mb-4">
+                <TriangleAlertIcon className="w-6 h-6 text-yellow-600 mr-2" />
+                <h2 className="text-lg font-semibold text-yellow-600">
+                  Confirm Deletion
+                </h2>
+              </div>
+              <p className="mb-6 text-sm text-slate-500">
                 Are you sure you want to delete{" "}
-                <span className="font-medium">{studentToDelete.name}</span>?
+                <span>
+                  {studentToDelete.name} This action cannot be undone.
+                </span>
+                ?
               </p>
-              <div className="flex justify-end space-x-2">
+              <div className="flex justify-center space-x-2">
                 <button onClick={cancelDelete} className="btn-secondary">
                   Cancel
                 </button>
@@ -433,6 +452,8 @@ const ManageStudents = () => {
             </div>
           </div>
         )}
+
+        {isCreateStudentModalOpen && <AddStudent />}
       </div>
     </div>
   );
