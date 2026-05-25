@@ -14,6 +14,7 @@ import {
   TriangleAlert,
   TriangleAlertIcon,
   User,
+  X,
 } from "lucide-react";
 
 const ManageStudents = () => {
@@ -337,86 +338,143 @@ const ManageStudents = () => {
 
         {/* Add/Edit Student Modal */}
         {showModel && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-            <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-6 mx-4">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-lg font-semibold">
-                  {editingStudent ? "Edit Student" : "Add New Student"}
-                </h2>
-              </div>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">
-                    Name
-                  </label>
-                  <input
-                    type="text"
-                    name="name"
-                    value={formData.name}
-                    onChange={(e) =>
-                      setFormData({ ...formData, name: e.target.value })
-                    }
-                    className="input-field w-full p-2 ring-1 ring-slate-300 rounded-md focus:outline-none "
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={(e) =>
-                      setFormData({ ...formData, email: e.target.value })
-                    }
-                    className="input-field w-full p-2 ring-1 ring-slate-300 rounded-md focus:outline-none "
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">
-                    Department
-                  </label>
-                  <select
-                    className="input-field w-full p-2 ring-1 ring-slate-300 rounded-md focus:outline-none "
-                    required
-                    value={formData.department}
-                    onChange={(e) =>
-                      setFormData({ ...formData, department: e.target.value })
-                    }
-                  >
-                    <option value="">Select Department</option>
-                    <option value="Computer Science">Computer Science</option>
-                    <option value="Software Engineering">
-                      Software Engineering
-                    </option>
-                    <option value="Data Science">Data Science</option>
-                    <option value="Electrical Engineering">
-                      Electrical Engineering
-                    </option>
-                    <option value="Mechanical Engineering">
-                      Mechanical Engineering
-                    </option>
-                    <option value="Civil Engineering">Civil Engineering</option>
-                    <option value="Business Administration">
-                      Business Administration
-                    </option>
-                    <option value="Economics">Economics</option>
-                    <option value="Physics"> Physics</option>
-                  </select>
-                </div>
-                <div className="flex justify-end space-x-2">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
+            <div className="relative w-full max-w-2xl rounded-3xl bg-white shadow-2xl border border-slate-200 overflow-hidden transition-all duration-200">
+              {/* Header */}
+              <div className="bg-gradient-to-r from-indigo-600 to-blue-600 px-6 py-5">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-2xl font-bold text-white">
+                      {editingStudent ? "Edit Student" : "Add New Student"}
+                    </h2>
+
+                    <p className="text-blue-100 text-sm mt-1">
+                      Manage student details and academic information
+                    </p>
+                  </div>
+
                   <button
                     type="button"
                     onClick={handleCloseModel}
-                    className="btn-secondary"
+                    className="w-9 h-9 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition"
                   >
-                    Cancel
+                    <X className="w-5 h-5 text-white" />
                   </button>
-                  <button type="submit" className="btn-primary">
-                    {editingStudent ? "Update" : "Create"}
+                </div>
+              </div>
+
+              {/* Form */}
+              <form
+                onSubmit={handleSubmit}
+                className="p-6 space-y-5 max-h-[80vh] overflow-y-auto"
+              >
+                {/* Name + Email */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-2">
+                      Full Name
+                    </label>
+
+                    <input
+                      type="text"
+                      name="name"
+                      value={formData.name}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          name: e.target.value,
+                        })
+                      }
+                      placeholder="Enter student name"
+                      className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-2">
+                      Email Address
+                    </label>
+
+                    <input
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          email: e.target.value,
+                        })
+                      }
+                      placeholder="Enter student email"
+                      className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                      required
+                    />
+                  </div>
+                </div>
+
+                {/* Department */}
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">
+                    Department
+                  </label>
+
+                  <select
+                    value={formData.department}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        department: e.target.value,
+                      })
+                    }
+                    className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                    required
+                  >
+                    <option value="">Select Department</option>
+
+                    <option value="Computer Science">Computer Science</option>
+
+                    <option value="Software Engineering">
+                      Software Engineering
+                    </option>
+
+                    <option value="Data Science">Data Science</option>
+
+                    <option value="Electrical Engineering">
+                      Electrical Engineering
+                    </option>
+
+                    <option value="Mechanical Engineering">
+                      Mechanical Engineering
+                    </option>
+
+                    <option value="Civil Engineering">Civil Engineering</option>
+
+                    <option value="Business Administration">
+                      Business Administration
+                    </option>
+
+                    <option value="Economics">Economics</option>
+
+                    <option value="Physics">Physics</option>
+                  </select>
+                </div>
+
+                {/* Footer */}
+                <div className="flex justify-end gap-3 pt-5 border-t border-slate-200">
+                  <button
+                    type="button"
+                    onClick={handleCloseModel}
+                    className="px-5 py-2.5 rounded-xl border border-slate-300 text-slate-700 font-medium hover:bg-slate-100 transition"
+                  >
+                    <span>Cancel</span>
+                  </button>
+
+                  <button
+                    type="submit"
+                    className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-blue-600 text-white font-semibold shadow-md hover:shadow-lg hover:scale-[1.02] transition"
+                  >
+                    {editingStudent ? "Update Student" : "Create Student"}
                   </button>
                 </div>
               </form>
@@ -426,26 +484,40 @@ const ManageStudents = () => {
 
         {/* Delete Confirmation Modal */}
         {showDeleteModel && studentToDelete && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-            <div className="bg-white rounded-lg shadow-lg w-full max-w-sm p-6">
-              <div className="flex flex-col items-center mb-4">
-                <TriangleAlertIcon className="w-6 h-6 text-yellow-600 mr-2" />
-                <h2 className="text-lg font-semibold text-yellow-600">
-                  Confirm Deletion
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
+            <div className="w-full max-w-md rounded-2xl bg-white shadow-2xl transition-all duration-200">
+              {/* Header */}
+              <div className="flex flex-col items-center px-6 pt-6">
+                <div className="flex items-center justify-center w-16 h-16 rounded-full bg-red-100 mb-4">
+                  <TriangleAlertIcon className="w-8 h-8 text-red-600" />
+                </div>
+
+                <h2 className="text-xl font-bold text-slate-800">
+                  Delete Student
                 </h2>
+
+                <p className="text-sm text-slate-500 text-center mt-2 leading-relaxed">
+                  Are you sure you want to delete{" "}
+                  <span className="font-semibold text-slate-700">
+                    {studentToDelete.name}
+                  </span>
+                  ? This action cannot be undone.
+                </p>
               </div>
-              <p className="mb-6 text-sm text-slate-500">
-                Are you sure you want to delete{" "}
-                <span>
-                  {studentToDelete.name} This action cannot be undone.
-                </span>
-                ?
-              </p>
-              <div className="flex justify-center space-x-2">
-                <button onClick={cancelDelete} className="btn-secondary">
+
+              {/* Footer */}
+              <div className="flex items-center justify-center gap-3 px-6 py-5 mt-4 border-t border-slate-200">
+                <button
+                  onClick={cancelDelete}
+                  className="px-4 py-2 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-100 transition-all duration-200"
+                >
                   Cancel
                 </button>
-                <button onClick={confirmDelete} className="btn-danger">
+
+                <button
+                  onClick={confirmDelete}
+                  className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 transition-all duration-200 shadow-md"
+                >
                   Delete
                 </button>
               </div>

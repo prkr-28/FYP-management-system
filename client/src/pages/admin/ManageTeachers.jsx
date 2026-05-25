@@ -1,8 +1,16 @@
 import { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import AddTeacher from "../../components/modal/AddTeacher";
-import { getAllUsers } from "../../store/slices/adminSlice";
-import { BadgeCheck, CheckCircle, Plus, User } from "lucide-react";
+import { getAllUsers, updateTeacher } from "../../store/slices/adminSlice";
+import {
+  BadgeCheck,
+  CheckCircle,
+  Plus,
+  TriangleAlertIcon,
+  User,
+  X,
+} from "lucide-react";
+import { toggleTeacherModel } from "../../store/slices/popupSlice";
 
 const ManageTeachers = () => {
   const { users } = useSelector((state) => state.admin);
@@ -20,6 +28,7 @@ const ManageTeachers = () => {
     email: "",
     department: "",
     expertise: "",
+    role: "Teacher",
     maxStudents: 10,
   });
 
@@ -58,6 +67,7 @@ const ManageTeachers = () => {
       email: "",
       department: "",
       expertise: "",
+      role: "Teacher",
       maxStudents: 10,
     });
   };
@@ -224,7 +234,7 @@ const ManageTeachers = () => {
           <h2 className="card-title">Teachers List</h2>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full">
+          <table className="w-full table-auto">
             <thead className="bg-slate-100">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wide">
@@ -248,6 +258,7 @@ const ManageTeachers = () => {
               {filteredTeachers.length > 0 ? (
                 filteredTeachers.map((teacher) => (
                   <tr key={teacher._id} className="hover:bg-slate-50">
+                    {/* Teacher Name */}
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm font-medium text-slate-900">
                         {teacher.name}
@@ -256,16 +267,15 @@ const ManageTeachers = () => {
                         {teacher.email}
                       </div>
                     </td>
+
+                    {/* Department */}
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-slate-900">
                         {teacher.department || "--"}
                       </div>
-                      <div className="text-sm text-slate-500">
-                        {teacher.joinDate
-                          ? new Date(teacher.joinDate).getFullYear()
-                          : "--"}
-                      </div>
                     </td>
+
+                    {/* Expertise */}
                     <td className="px-6 py-4 whitespace-nowrap">
                       {Array.isArray(teacher.expertise) &&
                       teacher.expertise.length > 0 ? (
@@ -282,21 +292,18 @@ const ManageTeachers = () => {
                       ) : (
                         <div className="text-sm text-slate-500">--</div>
                       )}
-                      {/* {teacher.expertise && teacher.expertise.length > 0 ? (
-                        <div className="flex flex-wrap gap-1">
-                          {teacher.expertise.map((exp, index) => (
-                            <span
-                              key={index}
-                              className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full"
-                            >
-                              {exp}
-                            </span>
-                          ))}
-                        </div>
-                      ) : (
-                        <div className="text-sm text-slate-500">--</div>
-                      )} */}
                     </td>
+
+                    {/* Join Date */}
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-slate-900">
+                        {teacher.createdAt
+                          ? new Date(teacher.createdAt).toLocaleString()
+                          : "--"}
+                      </div>
+                    </td>
+
+                    {/* Actions */}
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <div className="flex justify-end space-x-2">
                         <button
@@ -305,6 +312,7 @@ const ManageTeachers = () => {
                         >
                           Edit
                         </button>
+
                         <button
                           className="text-red-600 hover:text-red-900"
                           onClick={() => handleDelete(teacher)}
@@ -331,163 +339,220 @@ const ManageTeachers = () => {
 
         {/* Add/Edit Teacher Modal */}
         {showModel && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-            <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-6 mx-4">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-lg font-semibold">
-                  {editingTeacher ? "Edit Teacher" : "Add New Teacher"}
-                </h2>
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
+            <div className="relative w-full max-w-2xl rounded-3xl bg-white shadow-2xl border border-slate-200 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+              {/* Header */}
+              <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-5">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-2xl font-bold text-white">
+                      {editingTeacher ? "Edit Teacher" : "Add New Teacher"}
+                    </h2>
+                    <p className="text-blue-100 text-sm mt-1">
+                      Update teacher details and information
+                    </p>
+                  </div>
+
+                  <button
+                    onClick={handleCloseModel}
+                    className="w-9 h-9 flex items-center justify-center rounded-full bg-white/20 hover:bg-white/30 transition"
+                  >
+                    <X className="w-5 h-5 text-white" />
+                  </button>
+                </div>
               </div>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">
-                    Name
-                  </label>
-                  <input
-                    type="text"
-                    name="name"
-                    value={formData.name}
-                    onChange={(e) =>
-                      setFormData({ ...formData, name: e.target.value })
-                    }
-                    className="input-field w-full p-2 ring-1 ring-slate-300 rounded-md focus:outline-none "
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={(e) =>
-                      setFormData({ ...formData, email: e.target.value })
-                    }
-                    className="input-field w-full p-2 ring-1 ring-slate-300 rounded-md focus:outline-none "
-                    required
-                  />
-                </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">
-                    Department
-                  </label>
-                  <select
-                    className="input-field w-full p-2 ring-1 ring-slate-300 rounded-md focus:outline-none "
-                    required
-                    value={formData.department}
-                    onChange={(e) =>
-                      setFormData({ ...formData, department: e.target.value })
-                    }
-                  >
-                    <option value="">Select Department</option>
-                    <option value="Computer Science">Computer Science</option>
-                    <option value="Software Engineering">
-                      Software Engineering
-                    </option>
-                    <option value="Data Science">Data Science</option>
-                    <option value="Electrical Engineering">
-                      Electrical Engineering
-                    </option>
-                    <option value="Mechanical Engineering">
-                      Mechanical Engineering
-                    </option>
-                    <option value="Civil Engineering">Civil Engineering</option>
-                    <option value="Business Administration">
-                      Business Administration
-                    </option>
-                    <option value="Economics">Economics</option>
-                    <option value="Physics"> Physics</option>
-                  </select>
+              {/* Form */}
+              <form
+                onSubmit={handleSubmit}
+                className="p-6 space-y-5 max-h-[80vh] overflow-y-auto"
+              >
+                {/* Name + Email */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-2">
+                      Full Name
+                    </label>
+
+                    <input
+                      type="text"
+                      name="name"
+                      value={formData.name}
+                      onChange={(e) =>
+                        setFormData({ ...formData, name: e.target.value })
+                      }
+                      placeholder="Enter teacher name"
+                      className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-2">
+                      Email Address
+                    </label>
+
+                    <input
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={(e) =>
+                        setFormData({ ...formData, email: e.target.value })
+                      }
+                      placeholder="Enter teacher email"
+                      className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                      required
+                    />
+                  </div>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">
-                    Expertise
-                  </label>
-                  <select
-                    className="input-field w-full p-2 ring-1 ring-slate-300 rounded-md focus:outline-none "
-                    required
-                    value={formData.expertise}
-                    onChange={(e) =>
-                      setFormData({ ...formData, expertise: e.target.value })
-                    }
-                  >
-                    <option value="">Select Area of Experties</option>
+                {/* Department + Expertise */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-2">
+                      Department
+                    </label>
 
-                    <option value="Artificial Intelligence">
-                      Artificial Intelligence
-                    </option>
+                    <select
+                      value={formData.department}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          department: e.target.value,
+                        })
+                      }
+                      className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                      required
+                    >
+                      <option value="">Select Department</option>
+                      <option value="Computer Science">Computer Science</option>
+                      <option value="Software Engineering">
+                        Software Engineering
+                      </option>
+                      <option value="Data Science">Data Science</option>
+                      <option value="Electrical Engineering">
+                        Electrical Engineering
+                      </option>
+                      <option value="Mechanical Engineering">
+                        Mechanical Engineering
+                      </option>
+                      <option value="Civil Engineering">
+                        Civil Engineering
+                      </option>
+                      <option value="Business Administration">
+                        Business Administration
+                      </option>
+                      <option value="Economics">Economics</option>
+                      <option value="Physics">Physics</option>
+                    </select>
+                  </div>
 
-                    <option value="Machine Learning">Machine Learning</option>
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-2">
+                      Expertise
+                    </label>
 
-                    <option value="Data Science">Data Science</option>
+                    <select
+                      value={formData.expertise}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          expertise: e.target.value,
+                        })
+                      }
+                      className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                      required
+                    >
+                      <option value="">Select Expertise</option>
 
-                    <option value="Cybersecurity">Cybersecurity</option>
+                      <option value="Artificial Intelligence">
+                        Artificial Intelligence
+                      </option>
 
-                    <option value="Cloud Computing">Cloud Computing</option>
+                      <option value="Machine Learning">Machine Learning</option>
 
-                    <option value="Software Development">
-                      Software Development
-                    </option>
+                      <option value="Data Science">Data Science</option>
 
-                    <option value="Web Development">Web Development</option>
+                      <option value="Cybersecurity">Cybersecurity</option>
 
-                    <option value="Mobile App Development">
-                      Mobile App Development
-                    </option>
+                      <option value="Cloud Computing">Cloud Computing</option>
 
-                    <option value="Database Systems">Database Systems</option>
+                      <option value="Software Development">
+                        Software Development
+                      </option>
 
-                    <option value="Computer Networks">Computer Networks</option>
+                      <option value="Web Development">Web Development</option>
 
-                    <option value="Operating Systems">Operating Systems</option>
+                      <option value="Mobile App Development">
+                        Mobile App Development
+                      </option>
 
-                    <option value="Human-Computer Interaction">
-                      Human-Computer Interaction
-                    </option>
+                      <option value="Database Systems">Database Systems</option>
 
-                    <option value="Big Data Analytics">
-                      Big Data Analytics
-                    </option>
+                      <option value="Computer Networks">
+                        Computer Networks
+                      </option>
 
-                    <option value="Blockchain Technology">
-                      Blockchain Technology
-                    </option>
+                      <option value="Operating Systems">
+                        Operating Systems
+                      </option>
 
-                    <option value="Internet of Things (IoT)">
-                      Internet of Things (IoT)
-                    </option>
-                  </select>
+                      <option value="Human-Computer Interaction">
+                        Human-Computer Interaction
+                      </option>
+
+                      <option value="Big Data Analytics">
+                        Big Data Analytics
+                      </option>
+
+                      <option value="Blockchain Technology">
+                        Blockchain Technology
+                      </option>
+
+                      <option value="Internet of Things (IoT)">
+                        Internet of Things (IoT)
+                      </option>
+                    </select>
+                  </div>
                 </div>
 
+                {/* Max Students */}
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">
-                    Max Students
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">
+                    Maximum Students
                   </label>
+
                   <input
                     type="number"
                     name="maxStudents"
                     value={formData.maxStudents}
                     onChange={(e) =>
-                      setFormData({ ...formData, maxStudents: e.target.value })
+                      setFormData({
+                        ...formData,
+                        maxStudents: e.target.value,
+                      })
                     }
-                    className="input-field w-full p-2 ring-1 ring-slate-300 rounded-md focus:outline-none "
+                    placeholder="Enter max students"
+                    className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
                     required
                   />
                 </div>
-                <div className="flex justify-end space-x-2">
+
+                {/* Footer */}
+                <div className="flex justify-end gap-3 pt-4 border-t border-slate-200">
                   <button
                     type="button"
                     onClick={handleCloseModel}
-                    className="btn-secondary"
+                    className="px-5 py-2.5 rounded-xl border border-slate-300 text-slate-700 font-medium hover:bg-slate-100 transition"
                   >
                     Cancel
                   </button>
-                  <button type="submit" className="btn-primary">
-                    {editingTeacher ? "Update" : "Create"}
+
+                  <button
+                    type="submit"
+                    className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold shadow-md hover:shadow-lg hover:scale-[1.02] transition"
+                  >
+                    {editingTeacher ? "Update Teacher" : "Create Teacher"}
                   </button>
                 </div>
               </form>
@@ -497,26 +562,40 @@ const ManageTeachers = () => {
 
         {/* Delete Confirmation Modal */}
         {showDeleteModel && teacherToDelete && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-            <div className="bg-white rounded-lg shadow-lg w-full max-w-sm p-6">
-              <div className="flex flex-col items-center mb-4">
-                <TriangleAlertIcon className="w-6 h-6 text-yellow-600 mr-2" />
-                <h2 className="text-lg font-semibold text-yellow-600">
-                  Confirm Deletion
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
+            <div className="w-full max-w-md rounded-2xl bg-white shadow-2xl transition-all duration-200">
+              {/* Header */}
+              <div className="flex flex-col items-center px-6 pt-6">
+                <div className="flex items-center justify-center w-16 h-16 rounded-full bg-red-100 mb-4">
+                  <TriangleAlertIcon className="w-8 h-8 text-red-600" />
+                </div>
+
+                <h2 className="text-xl font-bold text-slate-800">
+                  Delete Teacher
                 </h2>
+
+                <p className="text-sm text-slate-500 text-center mt-2 leading-relaxed">
+                  Are you sure you want to delete{" "}
+                  <span className="font-semibold text-slate-700">
+                    {teacherToDelete.name}
+                  </span>
+                  ? This action cannot be undone.
+                </p>
               </div>
-              <p className="mb-6 text-sm text-slate-500">
-                Are you sure you want to delete{" "}
-                <span>
-                  {teacherToDelete.name} This action cannot be undone.
-                </span>
-                ?
-              </p>
-              <div className="flex justify-center space-x-2">
-                <button onClick={cancelDelete} className="btn-secondary">
+
+              {/* Footer */}
+              <div className="flex items-center justify-center gap-3 px-6 py-5 mt-4 border-t border-slate-200">
+                <button
+                  onClick={cancelDelete}
+                  className="px-4 py-2 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-100 transition-all duration-200"
+                >
                   Cancel
                 </button>
-                <button onClick={confirmDelete} className="btn-danger">
+
+                <button
+                  onClick={confirmDelete}
+                  className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 transition-all duration-200 shadow-md"
+                >
                   Delete
                 </button>
               </div>

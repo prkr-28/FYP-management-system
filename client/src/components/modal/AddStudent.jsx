@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import { createStudent } from "../../store/slices/adminSlice";
 import { toggleStudentModel } from "../../store/slices/popupSlice";
+import { X } from "lucide-react";
 
 const AddStudent = () => {
   const dispatch = useDispatch();
@@ -20,16 +21,37 @@ const AddStudent = () => {
   };
   return (
     <>
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-        <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-6 mx-4">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-semibold">Add New Student</h2>
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
+        <div className="relative w-full max-w-md overflow-hidden rounded-3xl bg-white shadow-2xl border border-slate-200">
+          {/* Header */}
+          <div className="bg-gradient-to-r from-indigo-600 to-blue-600 px-6 py-5">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-2xl font-bold text-white">
+                  Add New Student
+                </h2>
+                <p className="text-sm text-blue-100 mt-1">
+                  Create a new student account
+                </p>
+              </div>
+
+              <button
+                onClick={() => dispatch(toggleStudentModel())}
+                className="w-9 h-9 flex items-center justify-center rounded-full bg-white/20 hover:bg-white/30 transition"
+              >
+                <X className="w-5 h-5 text-white" />
+              </button>
+            </div>
           </div>
-          <form onSubmit={handleCreateStudent} className="space-y-4">
+
+          {/* Form */}
+          <form onSubmit={handleCreateStudent} className="p-6 space-y-5">
+            {/* Name */}
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">
-                Name
+              <label className="block text-sm font-semibold text-slate-700 mb-2">
+                Student Name
               </label>
+
               <input
                 type="text"
                 placeholder="Enter student name"
@@ -38,55 +60,68 @@ const AddStudent = () => {
                 onChange={(e) =>
                   setFormData({ ...formData, name: e.target.value })
                 }
-                className="input-field w-full p-2 ring-1 ring-slate-300 rounded-md focus:outline-none "
+                className="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm focus:border-indigo-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-indigo-100 transition"
                 required
               />
             </div>
+
+            {/* Email */}
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">
-                Email
+              <label className="block text-sm font-semibold text-slate-700 mb-2">
+                Email Address
               </label>
+
               <input
                 type="email"
+                placeholder="Enter student email"
                 name="email"
                 value={formData.email}
                 onChange={(e) =>
                   setFormData({ ...formData, email: e.target.value })
                 }
-                className="input-field w-full p-2 ring-1 ring-slate-300 rounded-md focus:outline-none "
+                className="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm focus:border-indigo-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-indigo-100 transition"
                 required
               />
             </div>
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-slate-700 mb-1">
+
+            {/* Password */}
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-2">
                 Password
               </label>
+
               <input
                 type="password"
+                placeholder="Enter password"
                 name="password"
                 value={formData.password}
                 onChange={(e) =>
                   setFormData({ ...formData, password: e.target.value })
                 }
-                className="input-field w-full p-2 ring-1 ring-slate-300 rounded-md focus:outline-none "
+                className="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm focus:border-indigo-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-indigo-100 transition"
                 required
               />
             </div>
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-slate-700 mb-1">
+
+            {/* Department */}
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-2">
                 Department
               </label>
+
               <select
-                className="input-field w-full p-2 ring-1 ring-slate-300 rounded-md focus:outline-none "
-                required
                 value={formData.department}
                 onChange={(e) =>
                   setFormData({ ...formData, department: e.target.value })
                 }
+                className="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm focus:border-indigo-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-indigo-100 transition"
+                required
               >
                 <option value="">Select Department</option>
                 <option value="Computer Science">Computer Science</option>
-                <option value="Mathematics">Software Engineering</option>
+                <option value="Software Engineering">
+                  Software Engineering
+                </option>
                 <option value="Data Science">Data Science</option>
                 <option value="Electrical Engineering">
                   Electrical Engineering
@@ -99,19 +134,25 @@ const AddStudent = () => {
                   Business Administration
                 </option>
                 <option value="Economics">Economics</option>
-                <option value="Physics"> Physics</option>
+                <option value="Physics">Physics</option>
               </select>
             </div>
-            <div className="flex justify-end space-x-2">
+
+            {/* Footer Buttons */}
+            <div className="flex items-center justify-end gap-3 pt-4">
               <button
                 type="button"
                 onClick={() => dispatch(toggleStudentModel())}
-                className="btn-secondary"
+                className="rounded-xl border border-slate-300 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
               >
                 Cancel
               </button>
-              <button type="submit" className="btn-primary">
-                Create
+
+              <button
+                type="submit"
+                className="rounded-xl bg-gradient-to-r from-indigo-600 to-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg transition hover:scale-[1.02] hover:shadow-xl"
+              >
+                Create Student
               </button>
             </div>
           </form>
