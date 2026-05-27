@@ -87,3 +87,5 @@ const projectSchema = new mongoose.Schema(
 projectSchema.index({ student: 1 });
 projectSchema.index({ supervisor: 1 });
 projectSchema.index({ status: 1 });
+
+export const Project = mongoose.models.Project || mongoose.model("Project", projectSchema);

@@ -34,29 +34,44 @@ import { useDispatch, useSelector } from "react-redux";
 import { ToastContainer } from "react-toastify";
 import { Loader } from "lucide-react";
 import { getUser } from "./store/slices/authSlice";
+import { getAllUsers } from "./store/slices/adminSlice";
 
 const App = () => {
-
-  const {authUser,isCheckingAuth} = useSelector((state) => state.auth);
+  const { authUser, isCheckingAuth } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
 
   useEffect(() => {
     dispatch(getUser());
   }, [dispatch]);
 
+  useEffect(() => {
+    if (authUser?.role === "Admin") {
+      dispatch(getAllUsers());
+    }
+  }, [authUser, dispatch]);
+
   //protecting dashboard routes...
-  const ProtectedRoute = ({children,allowedRoles}) => {
+  const ProtectedRoute = ({ children, allowedRoles }) => {
     if (!authUser) {
       return <Navigate to="/login" />;
     }
-    if (allowedRoles?.length && authUser?.user && !allowedRoles.includes(authUser.role)) {
-      const redirectPath = authUser.role === "Admin" ? "/admin" : authUser.role === "Teacher" ? "/teacher" : "/student";
+    if (
+      allowedRoles?.length &&
+      authUser?.user &&
+      !allowedRoles.includes(authUser.role)
+    ) {
+      const redirectPath =
+        authUser.role === "Admin"
+          ? "/admin"
+          : authUser.role === "Teacher"
+            ? "/teacher"
+            : "/student";
       return <Navigate to={redirectPath} />;
     }
     return children;
   };
 
-  if(isCheckingAuth){
+  if (isCheckingAuth) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loader className="animate-spin h-8 w-8 text-blue-500" />
@@ -70,11 +85,14 @@ const App = () => {
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
         {/* admin routes */}
-        <Route path="/admin" element={
-          <ProtectedRoute allowedRoles={["Admin"]}>
-            <DashboardLayout userRole={"Admin"}/>
-          </ProtectedRoute>
-        } >
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute allowedRoles={["Admin"]}>
+              <DashboardLayout userRole={"Admin"} />
+            </ProtectedRoute>
+          }
+        >
           <Route index element={<AdminDashboard />} />
           <Route path="students" element={<ManageStudents />} />
           <Route path="teachers" element={<ManageTeachers />} />
@@ -83,7 +101,7 @@ const App = () => {
           <Route path="projects" element={<ProjectsPage />} />
         </Route>
       </Routes>
-       <ToastContainer theme="light" position="top-right" autoClose={3000} />
+      <ToastContainer theme="light" position="top-right" autoClose={3000} />
     </BrowserRouter>
   );
 };

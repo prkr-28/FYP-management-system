@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import AddTeacher from "../../components/modal/AddTeacher";
-import { getAllUsers, updateTeacher } from "../../store/slices/adminSlice";
+import {updateTeacher } from "../../store/slices/adminSlice";
 import {
   BadgeCheck,
   CheckCircle,
@@ -31,10 +31,6 @@ const ManageTeachers = () => {
     role: "Teacher",
     maxStudents: 10,
   });
-
-  useEffect(() => {
-    dispatch(getAllUsers());
-  }, [dispatch]);
 
   const teachers = useMemo(() => {
     return (users || []).filter(

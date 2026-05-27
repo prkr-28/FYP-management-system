@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import AddStudent from "../../components/modal/AddStudent";
 import {
-  getAllUsers,
   updateStudent,
   createStudent,
   deleteStudent,
@@ -33,10 +32,6 @@ const ManageStudents = () => {
     email: "",
     department: "",
   });
-
-  useEffect(() => {
-    dispatch(getAllUsers());
-  }, [dispatch]);
 
   const students = useMemo(() => {
     const studentUsers = (users || []).filter(
