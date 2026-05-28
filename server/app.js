@@ -8,6 +8,7 @@ import { errorMiddleware } from './middlewares/error.js';
 dotenv.config();
 import authRoutes from './routes/userRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
+import studentRoutes from './routes/studentRoutes.js';
 
 const app = express();
 
@@ -31,7 +32,7 @@ app.use(cookiesParser());
 app.use(express.urlencoded({ extended: true }));
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/admin", adminRoutes);
-
+app.use("/api/v1/student", studentRoutes);
 
 app.use(errorMiddleware);
 
