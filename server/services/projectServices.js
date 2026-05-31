@@ -1,5 +1,5 @@
 import ErrorHandler from "../middlewares/error.js";
-import { Project } from "../models/Project.js";
+import { Project } from "../models/projectModel.js";
 
 export const getProjectByStudentId = async (studentId) => {
     const project = await Project.findOne({ student: studentId }).sort({ createdAt: -1 });

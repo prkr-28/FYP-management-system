@@ -7,6 +7,7 @@ import {
 } from "../controllers/studentController.js";
 import { isAuthenticated } from "../middlewares/authMiddleware.js";
 import { isAuthorized } from "../middlewares/isAuthorized.js";
+import { handleUploadError, upload } from "../middlewares/upload.js";
 
 const router = express.Router();
 

@@ -5,10 +5,18 @@ import cookiesParser from 'cookie-parser';
 import connectDB from './config/db.js';
 import rateLimit from 'express-rate-limit';
 import { errorMiddleware } from './middlewares/error.js';
-dotenv.config();
 import authRoutes from './routes/userRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
 import studentRoutes from './routes/studentRoutes.js';
+import { fileURLToPath } from 'url';
+import path from 'path';
+import fs from 'fs';
+
+dotenv.config();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 
 const app = express();
 
@@ -25,11 +33,22 @@ app.use(cors({
 }
 ));
 
+const uploadsDir = path.join(__dirname, 'uploads');
+const tempDir = path.join(uploadsDir, 'temp');
 
+if (!fs.existsSync(uploadsDir)) {
+    fs.mkdirSync(uploadsDir, { recursive: true });
+}
+if (!fs.existsSync(tempDir)) {
+    fs.mkdirSync(tempDir, { recursive: true });
+}
 
 app.use(express.json());
 app.use(cookiesParser());
 app.use(express.urlencoded({ extended: true }));
+
+
+
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/admin", adminRoutes);
 app.use("/api/v1/student", studentRoutes);
