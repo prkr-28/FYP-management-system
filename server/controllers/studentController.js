@@ -12,7 +12,7 @@ export const getStudentProject = asyncHandler(async (req, res, next) => {
 
     if (!project) {
         return res.status(404).json({
-            success: false,
+            success: true,
             data: { project: null },
             message: "No project found for the student",
         });
@@ -39,7 +39,7 @@ export const submitProposal = asyncHandler(async (req, res, next) => {
         student: studentId,
     };
     const newProject = await projectServices.createProject(projectData);
-    await User.findByIdAndUpdate(studentId, { $push: { projects: newProject._id } });
+    await User.findByIdAndUpdate(studentId, { projects: newProject._id });
     return res.status(201).json({
         success: true,
         data: { project: newProject },

@@ -3,7 +3,7 @@ import { Project } from "../models/projectModel.js";
 
 export const getProjectByStudentId = async (studentId) => {
     const project = await Project.findOne({ student: studentId }).sort({ createdAt: -1 });
-    return { project };
+    return project; // return the document (or null) directly
 };
 
 export const getProjectById = async (projectId) => {
