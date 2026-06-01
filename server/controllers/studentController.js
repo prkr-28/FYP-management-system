@@ -3,6 +3,8 @@ import ErrorHandler from "../middlewares/error.js";
 import { User } from "../models/userModel.js";
 import * as userServices from "../services/userServices.js";
 import * as projectServices from "../services/projectServices.js";
+import * as requestServices from "../services/requestServices.js";
+import * as notificationService from "../services/notificationService.js";
 
 
 export const getStudentProject = asyncHandler(async (req, res, next) => {
@@ -73,4 +75,57 @@ export const getAvailableSupervisors = asyncHandler(async (req, res, next) => {
         data: { supervisors },
         message: "Available supervisors retrieved successfully",
     });
+});
+
+export const getSupervisor = asyncHandler(async (req, res, next) => {
+    const studentId = req.user._id;
+    const student = await User.findById(studentId).populate("supervisor", "name email department expertise");
+
+    if (!student.supervisor) {
+        return res.status(404).json({
+            success: true,
+            data: { supervisor: null },
+            message: "No supervisor assigned yet",
+        });
+    }
+    return res.status(200).json({
+        success: true,
+        data: { supervisor: student.supervisor },
+        message: "Supervisor retrieved successfully",
+    });
+});
+
+export const requestSupervisor = asyncHandler(async (req, res, next) => {
+    const studentId = req.user._id;
+    const { teacherId, message } = req.body;
+
+    const student = await User.findById(studentId);
+    if (student.supervisor) {
+        return next(new ErrorHandler("You already have a supervisor assigned.", 400));
+    }
+
+    const supervisor = await User.findById(teacherId);
+    if (!supervisor || supervisor.role !== "Teacher") {
+        return next(new ErrorHandler("Supervisor not found", 404));
+    }
+
+    if (supervisor.assignedStudents.length >= supervisor.maxStudents) {
+        return next(new ErrorHandler("Supervisor has reached maximum student capacity", 400));
+    }
+
+    const requestedData = {
+        student: studentId,
+        supervisor: teacherId,
+        message,
+    }
+
+    const request = await requestServices.createRequest(requestedData);
+    await notificationService.notifyUser(teacherId, `${student.name} has requested ${supervisor.name} as their supervisor.`, "request", "/teacher/requests", "medium");
+
+    return res.status(200).json({
+        success: true,
+        data: { request },
+        message: "Supervisor request sent successfully",
+    });
+
 });

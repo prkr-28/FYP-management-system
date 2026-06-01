@@ -3,7 +3,9 @@ import {
     getStudentProject,
     submitProposal,
     uploadFiles,
-    getAvailableSupervisors
+    getAvailableSupervisors,
+    getSupervisor,
+    requestSupervisor
 } from "../controllers/studentController.js";
 import { isAuthenticated } from "../middlewares/authMiddleware.js";
 import { isAuthorized } from "../middlewares/isAuthorized.js";
@@ -15,5 +17,7 @@ router.get("/project", isAuthenticated, isAuthorized("Student"), getStudentProje
 router.post("/project-proposal", isAuthenticated, isAuthorized("Student"), submitProposal);
 router.post("/upload/:projectId", isAuthenticated, isAuthorized("Student"), upload.array("files", 10), handleUploadError, uploadFiles);
 router.get("/supervisors", isAuthenticated, isAuthorized("Student"), getAvailableSupervisors);
+router.get("/supervisor", isAuthenticated, isAuthorized("Student"), getSupervisor);
+router.post("/request-supervisor", isAuthenticated, isAuthorized("Student"), requestSupervisor);
 
 export default router;
