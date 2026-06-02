@@ -4,7 +4,7 @@ import { User } from "../models/userModel.js";
 import * as userServices from "../services/userServices.js";
 import * as projectServices from "../services/projectServices.js";
 import * as requestServices from "../services/requestServices.js";
-import * as notificationService from "../services/notificationService.js";
+import * as notificationService from "../services/notificationServices.js";
 
 
 export const getStudentProject = asyncHandler(async (req, res, next) => {
@@ -69,7 +69,7 @@ export const uploadFiles = asyncHandler(async (req, res, next) => {
 });
 
 export const getAvailableSupervisors = asyncHandler(async (req, res, next) => {
-    const supervisors = await User.find({ role: "supervisor" }).select("name email department expertise assignedStudents maxStudents").lean();
+    const supervisors = await User.find({ role: "Teacher" }).select("name email department expertise assignedStudents maxStudents").lean();
     return res.status(200).json({
         success: true,
         data: { supervisors },
@@ -82,7 +82,7 @@ export const getSupervisor = asyncHandler(async (req, res, next) => {
     const student = await User.findById(studentId).populate("supervisor", "name email department expertise");
 
     if (!student.supervisor) {
-        return res.status(404).json({
+        return res.status(200).json({
             success: true,
             data: { supervisor: null },
             message: "No supervisor assigned yet",

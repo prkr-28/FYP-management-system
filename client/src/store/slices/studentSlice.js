@@ -76,7 +76,7 @@ const studentSlice = createSlice({
       state.project = action.payload?.project || action.payload || null;
     });
     builder.addCase(getSupervisor.fulfilled, (state, action) => {
-      state.supervisor = action.payload.supervisor || null;
+      state.supervisor = action.payload || null;
     });
     builder.addCase(fetchAllSupervisors.fulfilled, (state, action) => {
       state.supervisors = action.payload.supervisors || action.payload || [];
