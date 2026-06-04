@@ -101,6 +101,19 @@ export const deleteTeacher = createAsyncThunk(
   }
 );
 
+export const getAllProjects = createAsyncThunk(
+  "getAllProjects",
+  async (_, thunkAPI) => {
+    try {
+      const response = await axiosInstance.get("/admin/get-all-projects");
+      return response.data.data;
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to fetch projects");
+      return thunkAPI.rejectWithValue(error.response?.data.message || "Failed to fetch projects");
+    }
+  }
+);
+
 
 
 const adminSlice = createSlice({
@@ -150,6 +163,9 @@ const adminSlice = createSlice({
           state.users = state.users.filter(user => user._id !== action.payload);
         }
       })
+      .addCase(getAllProjects.fulfilled, (state, action) => {
+        state.projects = action.payload.projects;
+      });
   },
 });
 

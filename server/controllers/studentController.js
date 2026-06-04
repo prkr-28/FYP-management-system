@@ -1,10 +1,14 @@
 import { asyncHandler } from "../middlewares/assyncHandler.js";
 import ErrorHandler from "../middlewares/error.js";
 import { User } from "../models/userModel.js";
+import { Project } from "../models/projectModel.js";
+import { SupervisorRequest } from "../models/supervisorRequestModel.js";
+import { Notification } from "../models/notificationModel.js";
 import * as userServices from "../services/userServices.js";
 import * as projectServices from "../services/projectServices.js";
 import * as requestServices from "../services/requestServices.js";
 import * as notificationService from "../services/notificationServices.js";
+import * as fileservices from "../services/fileServices.js";
 
 
 export const getStudentProject = asyncHandler(async (req, res, next) => {
@@ -128,4 +132,70 @@ export const requestSupervisor = asyncHandler(async (req, res, next) => {
         message: "Supervisor request sent successfully",
     });
 
+});
+
+export const getDashBoardStats = asyncHandler(async (req, res, next) => {
+    const studentId = req.user._id;
+    // Implement dashboard stats logic here
+    const project = await Project.findOne({ student: studentId }).sort({ createdAt: -1 }).populate("supervisor", "name").lean();
+
+    const now = new Date();
+    const upcomingDeadLined = await Project.find({
+        student: studentId,
+        deadline: { $gte: now },
+    }).select("title description").sort({ deadline: 1 }).limit(3).lean();
+
+    const topNotifications = await Notification.find({ user: studentId }).populate("user", "name").sort({ createdAt: -1 }).limit(3).lean();
+
+    const feedBackNotifications = project?.feedback && project.feedback.length > 0 ? project.feedback.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 2) : [];
+
+    const supervisorName = project?.supervisor?.name || "N/A";
+
+    return res.status(200).json({
+        success: true,
+        data: {
+            project,
+            upcomingDeadLined,
+            topNotifications,
+            feedBackNotifications,
+            supervisorName,
+        },
+        message: "Dashboard stats retrieved successfully",
+    });
+});
+
+export const getFeedBack = asyncHandler(async (req, res, next) => {
+    const studentId = req.user._id;
+    const { projectId } = req.params;
+
+    const projects = projectServices.getProjectById(projectId);
+
+    if (!projects || projects.student.toString() !== studentId.toString()) {
+        return next(new ErrorHandler("Project not found or you are not authorized to view feedback for this project", 403));
+    }
+
+    const sortedFeedback = projects.feedback.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+    return res.status(200).json({
+        success: true,
+        data: { feedback: sortedFeedback },
+        message: "Feedback retrieved successfully",
+    });
+});
+
+export const downloadFile = asyncHandler(async (req, res, next) => {
+    const studentId = req.user._id;
+    const { projectId, fileId } = req.params;
+    const project = await projectServices.getProjectById(projectId);
+
+    if (!project || project.student.toString() !== studentId.toString()) {
+        return next(new ErrorHandler("Project not found or you are not authorized to download files for this project", 403));
+    }
+
+    const file = project.files.id(fileId);
+
+    if (!file) {
+        return next(new ErrorHandler("File not found", 404));
+    }
+    fileservices.streamDownload(file.fileUrl, file.originalname, res);
 });

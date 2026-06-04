@@ -1,5 +1,5 @@
 import express from "express";
-import { createStudent, createTeacher, deleteStudent, deleteTeacher, getAllUsers, updateStudent, updateTeacher } from "../controllers/adminController.js";
+import { createStudent, createTeacher, deleteStudent, deleteTeacher, getAllProjects, getAllUsers, updateStudent, updateTeacher } from "../controllers/adminController.js";
 import multer from "multer";
 import { isAuthenticated } from "../middlewares/authMiddleware.js";
 import { isAuthorized } from "../middlewares/isAuthorized.js";
@@ -16,4 +16,5 @@ router.put('/update-teacher/:id', isAuthenticated, isAuthorized("Admin"), update
 router.delete('/delete-teacher/:id', isAuthenticated, isAuthorized("Admin"), deleteTeacher);
 
 router.get('/get-all-users', isAuthenticated, isAuthorized("Admin"), getAllUsers);
+router.get('/get-all-projects', isAuthenticated, isAuthorized("Admin"), getAllProjects);
 export default router;

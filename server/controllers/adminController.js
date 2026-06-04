@@ -2,6 +2,8 @@ import { asyncHandler } from "../middlewares/assyncHandler.js";
 import ErrorHandler from "../middlewares/error.js";
 import { User } from "../models/userModel.js";
 import * as userServices from "../services/userServices.js";
+import * as projectServices from "../services/projectServices.js";
+import { Project } from "../models/projectModel.js";
 
 export const createStudent = asyncHandler(async (req, res, next) => {
     const { name, email, password, department } = req.body;
@@ -113,6 +115,13 @@ export const getAllUsers = asyncHandler(async (req, res, next) => {
     });
 });
 
-export const getAllProjects = asyncHandler(async (req, res, next) => { });
+export const getAllProjects = asyncHandler(async (req, res, next) => {
+    const projects = await projectServices.getAllProjects();
+    res.status(200).json({
+        success: true,
+        message: "Projects fetched successfully",
+        data: { projects }
+    });
+});
 export const assignSupervisor = asyncHandler(async (req, res, next) => { });
 export const getDashBoardStats = asyncHandler(async (req, res, next) => { });

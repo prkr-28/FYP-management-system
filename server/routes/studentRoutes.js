@@ -5,7 +5,10 @@ import {
     uploadFiles,
     getAvailableSupervisors,
     getSupervisor,
-    requestSupervisor
+    requestSupervisor,
+    getDashBoardStats,
+    getFeedBack,
+    downloadFile
 } from "../controllers/studentController.js";
 import { isAuthenticated } from "../middlewares/authMiddleware.js";
 import { isAuthorized } from "../middlewares/isAuthorized.js";
@@ -19,5 +22,8 @@ router.post("/upload/:projectId", isAuthenticated, isAuthorized("Student"), uplo
 router.get("/supervisors", isAuthenticated, isAuthorized("Student"), getAvailableSupervisors);
 router.get("/supervisor", isAuthenticated, isAuthorized("Student"), getSupervisor);
 router.post("/request-supervisor", isAuthenticated, isAuthorized("Student"), requestSupervisor);
+router.get("/dashboard-stats", isAuthenticated, isAuthorized("Student"), getDashBoardStats);
+router.get("/feedback/:projectId", isAuthenticated, isAuthorized("Student"), getFeedBack);
+router.get("/download/:projectId/:fileId", isAuthenticated, isAuthorized("Student"), downloadFile);
 
 export default router;

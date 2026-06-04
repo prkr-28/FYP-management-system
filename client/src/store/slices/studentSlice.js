@@ -71,6 +71,43 @@ export const uploadProjectFiles = createAsyncThunk('student/uploadProjectFiles',
   }
 });
 
+export const fetchDashboardStats = createAsyncThunk('student/fetchDashboardStats', async (_, thunkAPI) => {
+  try {
+    const res = await axiosInstance.get('/student/dashboard-stats');
+    return res.data.data || {};
+  } catch (error) {
+    toast.error(error.response.data.message || "Failed to fetch dashboard stats");
+    return thunkAPI.rejectWithValue(error.response.data);
+  }
+});
+
+export const getFeedBack = createAsyncThunk('student/getFeedBack', async (projectId, thunkAPI) => {
+  try {
+    const res = await axiosInstance.get(`/student/feedback/${projectId}`);
+    return res.data.data?.feedback || [];
+  } catch (error) {
+    toast.error(error.response.data.message || "Failed to fetch feedback");
+    return thunkAPI.rejectWithValue(error.response.data);
+  }
+});
+
+export const downloadFile = createAsyncThunk('student/downloadFile', async ({ projectId, fileId }, thunkAPI) => {
+  try {
+    const res = await axiosInstance.get(`/student/download/${projectId}/${fileId}`, {
+      responseType: 'blob',
+    });
+    return {
+      blob: res.data,
+      projectId,
+      fileId
+    }
+    toast.success("File downloaded successfully");
+  } catch (error) {
+    toast.error(error.response.data.message || "Failed to download file");
+    return thunkAPI.rejectWithValue(error.response.data);
+  }
+});
+
 const studentSlice = createSlice({
   name: "student",
   initialState: {
@@ -103,6 +140,12 @@ const studentSlice = createSlice({
     builder.addCase(uploadProjectFiles.fulfilled, (state, action) => {
       const newFiles = action.payload?.project?.files || action.payload?.files || [];
       state.files = [...state.files, ...newFiles];
+    });
+    builder.addCase(fetchDashboardStats.fulfilled, (state, action) => {
+      state.dashboardStats = action.payload || {};
+    });
+    builder.addCase(getFeedBack.fulfilled, (state, action) => {
+      state.feedback = action.payload || [];
     });
   },
 });
