@@ -25,9 +25,11 @@ export const addFilesToProject = async (projectId, files) => {
         throw new ErrorHandler("Project not found", 404);
     }
     const fileData = files.map((file) => ({
+        projectId,
         fileType: file.mimetype,
         fileUrl: file.path,
         originalName: file.originalname,
+        fileSize: file.size,
         uploadedAt: new Date(),
     }));
     project.files.push(...fileData);

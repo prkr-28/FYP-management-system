@@ -39,6 +39,10 @@ export const submitProposal = asyncHandler(async (req, res, next) => {
         return next(new ErrorHandler("You have already an active proposal. You can submit a new one only after the current one is rejected.", 400));
     }
 
+    if (project && project.status === "rejected") {
+        await Project.findByIdAndDelete(project._id);
+    }
+
     const projectData = {
         title,
         description,
@@ -58,7 +62,7 @@ export const uploadFiles = asyncHandler(async (req, res, next) => {
     const { projectId } = req.params;
     const project = await projectServices.getProjectById(projectId);
 
-    if (!project || project.student.toString() !== studentId.toString()) {
+    if (!project || project.student._id.toString() !== studentId.toString()) {
         return next(new ErrorHandler("Project not found or you are not authorized to upload files for this project", 403));
     }
     if (!req.files || req.files.length === 0) {

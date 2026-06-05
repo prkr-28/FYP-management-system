@@ -70,14 +70,14 @@ const UploadFiles = () => {
   };
 
   const handleDownloadFile = async (file) => {
-    if (!file?.projectId || !file?.fileId) {
+    if (!file?.projectId || !file?._id) {
       toast.error("Invalid file or project ID");
       return;
     }
     setDownloadingId(file.fileId);
     try {
       const res = await dispatch(
-        downloadFile({ projectId: file.projectId, fileId: file.fileId }),
+        downloadFile({ projectId: file.projectId, fileId: file._id }),
       );
       if (res.meta.requestStatus !== "fulfilled") return;
       const url = URL.createObjectURL(res.payload.blob);
@@ -165,7 +165,11 @@ const UploadFiles = () => {
     },
   ];
 
+  console.log(project);
+
   const uploadedFiles = project?.files || [];
+
+  console.log(uploadedFiles);
 
   return (
     <div className="p-6 space-y-5">
@@ -378,7 +382,7 @@ const UploadFiles = () => {
                   icon: Icon,
                   color,
                   bg,
-                } = getFileIconByName(file.fileName || file.name || "");
+                } = getFileIconByName(file.fileName || file.fileType);
                 const isDownloading = downloadingId === file.fileId;
                 return (
                   <div
@@ -393,15 +397,14 @@ const UploadFiles = () => {
                         <Icon className={`w-4 h-4 ${color}`} />
                       </div>
                       <p className="text-sm font-medium text-slate-800 truncate">
-                        {file.fileName || file.name || "Unnamed file"}
+                        {file.originalName}
                       </p>
                     </div>
 
                     {/* Type */}
                     <div className="hidden md:flex col-span-2">
                       <span className="badge bg-slate-100 text-slate-600 text-xs uppercase">
-                        {(file.fileName || file.name || "").split(".").pop() ||
-                          "—"}
+                        {file.fileType.split(".").pop() || "—"}
                       </span>
                     </div>
 

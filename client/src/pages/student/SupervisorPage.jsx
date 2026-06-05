@@ -102,7 +102,7 @@ const SupervisorPage = () => {
             <div className="px-6 py-6">
               <div className="flex items-start gap-5">
                 <img
-                  src="/placeholder.png"
+                  src="/placeholder.jpg"
                   alt="Supervisor"
                   className="w-16 h-16 rounded-xl object-cover shadow-sm border border-slate-200 flex-shrink-0"
                 />
