@@ -192,7 +192,8 @@ export const downloadFile = asyncHandler(async (req, res, next) => {
     const { projectId, fileId } = req.params;
     const project = await projectServices.getProjectById(projectId);
 
-    if (!project || project.student.toString() !== studentId.toString()) {
+    // FIX: populated student is an object, compare ._id not the object itself
+    if (!project || project.student._id.toString() !== studentId.toString()) {
         return next(new ErrorHandler("Project not found or you are not authorized to download files for this project", 403));
     }
 
@@ -201,5 +202,5 @@ export const downloadFile = asyncHandler(async (req, res, next) => {
     if (!file) {
         return next(new ErrorHandler("File not found", 404));
     }
-    fileservices.streamDownload(file.fileUrl, file.originalname, res);
+    fileservices.streamDownload(file.fileUrl, file.originalName, res);
 });

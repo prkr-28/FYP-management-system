@@ -43,6 +43,10 @@ const projectSchema = new mongoose.Schema(
                     type: String,
                     required: true,
                 },
+                size: {                   // FIX: was missing from schema, added
+                    type: Number,
+                    default: 0,
+                },
                 uploadedAt: {
                     type: Date,
                     default: Date.now,

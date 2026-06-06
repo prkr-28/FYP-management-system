@@ -2,10 +2,10 @@ import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import {
-  downloadFile,
   fetchProject,
   uploadProjectFiles,
 } from "../../store/slices/studentSlice";
+import { axiosInstance } from "../../lib/axios"; // FIX: import axiosInstance directly
 import {
   Archive,
   FileText,
@@ -57,7 +57,7 @@ const UploadFiles = () => {
     )
       .unwrap()
       .then(() => {
-        toast.success("Files uploaded successfully!");
+        // toast.success("Files uploaded successfully!");
         setSelectedFiles([]);
       })
       .catch(() => {
@@ -69,29 +69,58 @@ const UploadFiles = () => {
     setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
+  // FIX: download directly via axiosInstance — don't go through Redux (Blob is non-serializable)
   const handleDownloadFile = async (file) => {
-    if (!file?.projectId || !file?._id) {
+    const fileId = file._id;
+    const projectId = project?._id;
+
+    if (!projectId || !fileId) {
       toast.error("Invalid file or project ID");
       return;
     }
-    setDownloadingId(file.fileId);
+
+    setDownloadingId(fileId);
     try {
-      const res = await dispatch(
-        downloadFile({ projectId: file.projectId, fileId: file._id }),
+      const res = await axiosInstance.get(
+        `/student/download/${projectId}/${fileId}`,
+        {
+          responseType: "blob",
+        },
       );
-      if (res.meta.requestStatus !== "fulfilled") return;
-      const url = URL.createObjectURL(res.payload.blob);
+
+      // If server returned an error JSON wrapped as blob, parse and show it
+      if (res.data.type === "application/json") {
+        const text = await res.data.text();
+        const err = JSON.parse(text);
+        toast.error(err.message || "Download failed.");
+        return;
+      }
+
+      const url = URL.createObjectURL(res.data);
       const a = Object.assign(document.createElement("a"), {
         href: url,
-        download: file.fileName || "downloaded_file",
+        download: file.originalName || "downloaded_file",
       });
       document.body.appendChild(a);
       a.click();
       a.remove();
       URL.revokeObjectURL(url);
-      toast.success(`"${file.fileName}" downloaded successfully.`);
-    } catch {
-      toast.error("Download failed. Please try again.");
+      toast.success(`"${file.originalName}" downloaded successfully.`);
+    } catch (err) {
+      // Axios error with blob response — try to parse the JSON error body
+      if (err.response?.data instanceof Blob) {
+        try {
+          const text = await err.response.data.text();
+          const parsed = JSON.parse(text);
+          toast.error(parsed.message || "Download failed.");
+        } catch {
+          toast.error("Download failed. Please try again.");
+        }
+      } else {
+        toast.error(
+          err.response?.data?.message || "Download failed. Please try again.",
+        );
+      }
     } finally {
       setDownloadingId(null);
     }
@@ -113,17 +142,46 @@ const UploadFiles = () => {
     });
   };
 
-  const getFileIconByName = (fileName) => {
-    const ext = fileName?.split(".").pop().toLowerCase();
+  const getExtension = (file) => {
+    if (file.originalName) {
+      const ext = file.originalName.split(".").pop().toLowerCase();
+      if (ext) return ext;
+    }
+    if (file.fileType) {
+      return file.fileType
+        .split("/")
+        .pop()
+        .replace(
+          "vnd.openxmlformats-officedocument.wordprocessingml.document",
+          "docx",
+        )
+        .replace("vnd.ms-powerpoint", "ppt")
+        .replace(
+          "vnd.openxmlformats-officedocument.presentationml.presentation",
+          "pptx",
+        )
+        .replace("x-zip-compressed", "zip")
+        .replace("x-rar-compressed", "rar")
+        .replace("msword", "doc");
+    }
+    return "";
+  };
+
+  const getFileIconByExt = (ext) => {
     if (["pdf", "doc", "docx"].includes(ext))
       return { icon: FileText, color: "text-blue-500", bg: "bg-blue-50" };
-    if (["jpg", "jpeg", "png"].includes(ext))
+    if (["jpg", "jpeg", "png", "gif"].includes(ext))
       return { icon: Image, color: "text-purple-500", bg: "bg-purple-50" };
     if (["zip", "rar", "tar", "gz"].includes(ext))
       return { icon: Archive, color: "text-orange-500", bg: "bg-orange-50" };
     if (["ppt", "pptx"].includes(ext))
       return { icon: FileCode, color: "text-green-500", bg: "bg-green-50" };
     return { icon: File, color: "text-slate-400", bg: "bg-slate-100" };
+  };
+
+  const getFileIconByName = (fileName) => {
+    const ext = fileName?.split(".").pop().toLowerCase() || "";
+    return getFileIconByExt(ext);
   };
 
   const uploadZones = [
@@ -165,18 +223,13 @@ const UploadFiles = () => {
     },
   ];
 
-  console.log(project);
-
   const uploadedFiles = project?.files || [];
-
-  console.log(uploadedFiles);
 
   return (
     <div className="p-6 space-y-5">
       {/* ── Upload Card ── */}
       <div className="card p-0 overflow-hidden">
         <div className="h-1 w-full bg-blue-500" />
-
         <div className="px-6 pt-5 pb-4 border-b border-slate-200 flex items-center gap-3">
           <div className="w-9 h-9 rounded-lg bg-blue-100 flex items-center justify-center">
             <Upload className="w-4 h-4 text-blue-500" />
@@ -190,7 +243,6 @@ const UploadFiles = () => {
         </div>
 
         <div className="px-6 py-6 space-y-6">
-          {/* Upload Zones */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {uploadZones.map((zone) => {
               const Icon = zone.icon;
@@ -310,7 +362,6 @@ const UploadFiles = () => {
           </div>
         </div>
 
-        {/* Upload Footer */}
         <div className="px-6 py-4 border-t border-slate-200 bg-slate-50 flex items-center justify-between gap-4 flex-wrap">
           <p className="flex items-center gap-1.5 text-xs text-slate-400">
             <CheckCircle2 className="w-3.5 h-3.5 text-green-500" />
@@ -333,7 +384,6 @@ const UploadFiles = () => {
       {/* ── Uploaded Files Card ── */}
       <div className="card p-0 overflow-hidden">
         <div className="h-1 w-full bg-green-500" />
-
         <div className="px-6 pt-5 pb-4 border-b border-slate-200 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-lg bg-green-100 flex items-center justify-center">
@@ -368,7 +418,6 @@ const UploadFiles = () => {
             </div>
           ) : (
             <div className="space-y-2">
-              {/* Table Header */}
               <div className="hidden md:grid grid-cols-12 px-4 py-2 text-xs font-medium text-slate-400 uppercase tracking-wider border-b border-slate-100">
                 <span className="col-span-5">File Name</span>
                 <span className="col-span-2">Type</span>
@@ -378,18 +427,16 @@ const UploadFiles = () => {
               </div>
 
               {uploadedFiles.map((file, index) => {
-                const {
-                  icon: Icon,
-                  color,
-                  bg,
-                } = getFileIconByName(file.fileName || file.fileType);
-                const isDownloading = downloadingId === file.fileId;
+                const fileId = file._id;
+                const ext = getExtension(file);
+                const { icon: Icon, color, bg } = getFileIconByExt(ext);
+                const isDownloading = downloadingId === fileId;
+
                 return (
                   <div
-                    key={file.fileId || index}
-                    className="grid grid-cols-12 items-center px-4 py-3 rounded-lg border border-slate-200 hover:border-blue-200 hover:bg-blue-50/30 transition-all duration-150 group"
+                    key={fileId || index}
+                    className="grid grid-cols-12 items-center px-4 py-3 rounded-lg border border-slate-200 hover:border-blue-200 hover:bg-blue-50/30 transition-all duration-150"
                   >
-                    {/* Name */}
                     <div className="col-span-10 md:col-span-5 flex items-center gap-3 min-w-0">
                       <div
                         className={`w-8 h-8 rounded-lg ${bg} flex items-center justify-center flex-shrink-0`}
@@ -397,44 +444,36 @@ const UploadFiles = () => {
                         <Icon className={`w-4 h-4 ${color}`} />
                       </div>
                       <p className="text-sm font-medium text-slate-800 truncate">
-                        {file.originalName}
+                        {file.originalName || "Unnamed file"}
                       </p>
                     </div>
 
-                    {/* Type */}
                     <div className="hidden md:flex col-span-2">
-                      <span className="badge bg-slate-100 text-slate-600 text-xs uppercase">
-                        {file.fileType.split(".").pop() || "—"}
+                      <span className="badge bg-slate-100 text-slate-600 text-xs uppercase px-2 py-0.5">
+                        {ext || "—"}
                       </span>
                     </div>
 
-                    {/* Size */}
+                    {/* FIX: read file.size (matches updated schema + service) */}
                     <div className="hidden md:block col-span-2">
                       <p className="text-xs text-slate-500">
                         {formatSize(file.size)}
                       </p>
                     </div>
 
-                    {/* Date */}
                     <div className="hidden md:flex col-span-2 items-center gap-1.5">
                       <Clock className="w-3 h-3 text-slate-400" />
                       <p className="text-xs text-slate-500">
-                        {formatDate(file.uploadedAt || file.createdAt)}
+                        {formatDate(file.uploadedAt)}
                       </p>
                     </div>
 
-                    {/* Download button */}
                     <div className="col-span-2 md:col-span-1 flex justify-end">
                       <button
-                        onClick={() =>
-                          handleDownloadFile({
-                            ...file,
-                            projectId: project?._id,
-                          })
-                        }
+                        onClick={() => handleDownloadFile(file)}
                         disabled={isDownloading}
                         className="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:text-blue-500 hover:border-blue-300 hover:bg-blue-50 transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
-                        title={`Download ${file.fileName || "file"}`}
+                        title={`Download ${file.originalName || "file"}`}
                       >
                         {isDownloading ? (
                           <svg
