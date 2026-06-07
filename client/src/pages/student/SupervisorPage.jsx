@@ -17,6 +17,7 @@ import {
   AlignLeft,
   Users,
 } from "lucide-react";
+import { toast } from "react-toastify";
 
 const SupervisorPage = () => {
   const dispatch = useDispatch();
@@ -55,10 +56,15 @@ const SupervisorPage = () => {
     const message =
       requestMessage.trim() ||
       `${authUser.name} is requesting ${selectedSupervisor.name} to be their supervisor for their project.`;
-    dispatch(requestSupervisor({ teacherId: selectedSupervisor._id, message }));
-    setShowRequestModal(false);
-    setSelectedSupervisor(null);
-    setRequestMessage("");
+    dispatch(
+      requestSupervisor({ teacherId: selectedSupervisor._id, message }),
+    ).then((res) => {
+      if (res.type === "student/requestSupervisor/fulfilled") {
+        setShowRequestModal(false);
+        setSelectedSupervisor(null);
+        setRequestMessage("");
+      }
+    });
   };
 
   const InfoField = ({ icon: Icon, label, value, children }) => (

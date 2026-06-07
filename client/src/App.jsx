@@ -5,6 +5,7 @@ import { useEffect } from "react";
 import LoginPage from "./pages/auth/LoginPage";
 import ForgotPasswordPage from "./pages/auth/ForgotPasswordPage";
 import ResetPasswordPage from "./pages/auth/ResetPasswordPage";
+import HomePage from "./pages/HomePage";
 
 // Dashboard Layouts
 import DashboardLayout from "./components/layout/DashboardLayout";
@@ -82,6 +83,7 @@ const App = () => {
   return (
     <BrowserRouter>
       <Routes>
+        <Route path="/" element={authUser ? <Navigate to={authUser.role === "Admin" ? "/admin" : authUser.role === "Teacher" ? "/teacher" : "/student"} /> : <HomePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
@@ -116,6 +118,20 @@ const App = () => {
           <Route path="supervisor" element={<SupervisorPage />} />
           <Route path="feedback" element={<FeedbackPage />} />
           <Route path="notifications" element={<NotificationsPage />} />
+        </Route>
+
+        <Route
+          path="/teacher"
+          element={
+            <ProtectedRoute allowedRoles={["Teacher"]}>
+              <DashboardLayout userRole={"Teacher"} />
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<TeacherDashboard />} />
+          <Route path="pending-requests" element={<PendingRequests />} />
+          <Route path="assigned-students" element={<AssignedStudents />} />
+          <Route path="files" element={<TeacherFiles />} />
         </Route>
       </Routes>
       <ToastContainer theme="light" position="top-right" autoClose={3000} />
