@@ -144,10 +144,14 @@ export const getDashBoardStats = asyncHandler(async (req, res, next) => {
     const project = await Project.findOne({ student: studentId }).sort({ createdAt: -1 }).populate("supervisor", "name").lean();
 
     const now = new Date();
-    const upcomingDeadLined = await Project.find({
+    const upcomingDeadLine = await Project.find({
         student: studentId,
         deadline: { $gte: now },
-    }).select("title description").sort({ deadline: 1 }).limit(3).lean();
+    })
+        .select("title description")
+        .sort({ deadline: 1 })
+        .limit(3)
+        .lean();
 
     const topNotifications = await Notification.find({ user: studentId }).populate("user", "name").sort({ createdAt: -1 }).limit(3).lean();
 
@@ -159,7 +163,7 @@ export const getDashBoardStats = asyncHandler(async (req, res, next) => {
         success: true,
         data: {
             project,
-            upcomingDeadLined,
+            upcomingDeadLine,
             topNotifications,
             feedBackNotifications,
             supervisorName,

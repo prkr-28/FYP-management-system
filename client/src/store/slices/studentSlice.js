@@ -48,6 +48,7 @@ export const requestSupervisor = createAsyncThunk('student/requestSupervisor', a
   try {
     const res = await axiosInstance.post('/student/request-supervisor', data);
     thunkAPI.dispatch(getSupervisor());
+    toast.success(res.data.message);
     return res.data.data?.request;
   } catch (error) {
     toast.error(error.response.data.message || "Failed to request supervisor");
@@ -114,7 +115,7 @@ const studentSlice = createSlice({
     project: null,
     files: [],
     supervisors: [],
-    dashboardStats: [],
+    dashboardStats: {},
     supervisor: null,
     deadlines: [],
     feedback: [],
@@ -127,6 +128,7 @@ const studentSlice = createSlice({
     });
     builder.addCase(fetchProject.fulfilled, (state, action) => {
       state.project = action.payload?.project || action.payload || null;
+      state.files = action.payload?.files || [];
     });
     builder.addCase(getSupervisor.fulfilled, (state, action) => {
       state.supervisor = action.payload || null;
