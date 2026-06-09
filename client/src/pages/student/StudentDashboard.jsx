@@ -196,12 +196,12 @@ const StudentDashboard = () => {
           <div className="card">
             <div className="card-header flex items-center justify-between">
               <h2 className="card-title">Project Overview</h2>
-              <Link
+              {/* <Link
                 to="/student/proposal"
                 className="flex items-center gap-0.5 text-xs font-semibold text-violet-600 hover:text-violet-800 transition-colors"
               >
                 View <ChevronRight className="w-3.5 h-3.5" />
-              </Link>
+              </Link> */}
             </div>
 
             <div className="space-y-4">
@@ -242,7 +242,7 @@ const StudentDashboard = () => {
                 </div>
                 <div className="text-right">
                   <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1">
-                    Deadline
+                    Submission Deadline
                   </label>
                   <p className="text-sm font-semibold text-slate-700">
                     {fmt(project?.deadline)}
@@ -264,7 +264,7 @@ const StudentDashboard = () => {
               </Link>
             </div>
 
-            {feedBackNotifications.length > 0 ? (
+            {feedBackNotifications && feedBackNotifications.length > 0 ? (
               <div className="space-y-3">
                 {feedBackNotifications.map((fb, i) => (
                   <div
@@ -273,7 +273,7 @@ const StudentDashboard = () => {
                   >
                     <div className="flex items-center justify-between mb-1.5">
                       <p className="text-sm font-bold text-slate-800">
-                        {fb.title}
+                        {fb.title || "Supervisor Feedback"}
                       </p>
                       <span
                         className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold capitalize ${feedbackBadge[fb.type] || feedbackBadge.general}`}
@@ -330,10 +330,10 @@ const StudentDashboard = () => {
                     </div>
                     <div className="min-w-0">
                       <p className="text-sm font-bold text-slate-800 truncate">
-                        {d.title || d.name}
+                        {d.name}
                       </p>
                       <p className="text-xs text-amber-600 font-medium mt-0.5">
-                        {fmt(d.deadline || d.dueDate)}
+                        {fmt(d.dueDate)}
                       </p>
                     </div>
                   </div>

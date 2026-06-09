@@ -15,3 +15,16 @@ export const notifyUser = async (userId, message, type = "general", link = null,
     };
     return await createNotification(notificationData);
 };
+
+export const markAsRead = async (notificationId, userId) => {
+    const notification = await Notification.findOne({ _id: notificationId, user: userId });
+    if (!notification) {
+        return null;
+    }
+    notification.isRead = true;
+    return await notification.save();
+};
+
+export const markAllAsRead = async (userId) => {
+    return await Notification.updateMany({ user: userId, isRead: false }, { $set: { isRead: true } });
+};
