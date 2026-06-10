@@ -176,13 +176,22 @@ export const getFeedBack = asyncHandler(async (req, res, next) => {
     const studentId = req.user._id;
     const { projectId } = req.params;
 
-    const projects = projectServices.getProjectById(projectId);
+    const project = await projectServices.getProjectById(projectId);
 
-    if (!projects || projects.student.toString() !== studentId.toString()) {
-        return next(new ErrorHandler("Project not found or you are not authorized to view feedback for this project", 403));
+    if (
+        !project ||
+        !project.student ||
+        project.student._id.toString() !== studentId.toString()
+    ) {
+        return next(
+            new ErrorHandler(
+                "Project not found or you are not authorized to view feedback for this project",
+                403
+            )
+        );
     }
 
-    const sortedFeedback = projects.feedback.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    const sortedFeedback = [...project.feedback];
 
     return res.status(200).json({
         success: true,
