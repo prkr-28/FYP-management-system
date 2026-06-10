@@ -9,3 +9,5 @@ router.get('/', isAuthenticated, getNotifications);
 router.put('/mark-as-read/:notificationId', isAuthenticated, markAsRead);
 router.put('/mark-all-as-read', isAuthenticated, markAllAsRead);
 router.delete('/delete/:notificationId', isAuthenticated, deleteNotification);
+
+export default router;
