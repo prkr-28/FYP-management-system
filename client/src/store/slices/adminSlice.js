@@ -114,6 +114,19 @@ export const getAllProjects = createAsyncThunk(
   }
 );
 
+export const getDashBoardStats = createAsyncThunk(
+  "getDashBoardStats",
+  async (_, thunkAPI) => {
+    try {
+      const response = await axiosInstance.get("/admin/get-dashboard-stats");
+      return response.data.data.stats;
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to fetch dashboard stats");
+      return thunkAPI.rejectWithValue(error.response?.data.message || "Failed to fetch dashboard stats");
+    }
+  }
+);
+
 
 
 const adminSlice = createSlice({
@@ -165,6 +178,9 @@ const adminSlice = createSlice({
       })
       .addCase(getAllProjects.fulfilled, (state, action) => {
         state.projects = action.payload.projects;
+      })
+      .addCase(getDashBoardStats.fulfilled, (state, action) => {
+        state.stats = action.payload;
       });
   },
 });

@@ -4,6 +4,7 @@ import { User } from "../models/userModel.js";
 import * as userServices from "../services/userServices.js";
 import * as projectServices from "../services/projectServices.js";
 import { Project } from "../models/projectModel.js";
+import { SupervisorRequest } from "../models/supervisorRequestModel.js";
 
 export const createStudent = asyncHandler(async (req, res, next) => {
     const { name, email, password, department } = req.body;
@@ -123,5 +124,30 @@ export const getAllProjects = asyncHandler(async (req, res, next) => {
         data: { projects }
     });
 });
+export const getDashBoardStats = asyncHandler(async (req, res, next) => {
+    const [totalStudents, totalTeachers, totalProjects, pendingRequests, completedProjects, pendingProjects] = await Promise.all([
+        User.countDocuments({ role: "Student" }),
+        User.countDocuments({ role: "Teacher" }),
+        Project.countDocuments(),
+        SupervisorRequest.countDocuments({ status: "pending" }),
+        Project.countDocuments({ status: "completed" }),
+        Project.countDocuments({ status: "pending" }),
+
+    ]);
+    const data = {
+        stats: {
+            totalStudents,
+            totalTeachers,
+            totalProjects,
+            pendingRequests,
+            completedProjects,
+            pendingProjects
+        },
+    };
+    res.status(200).json({
+        success: true,
+        message: "Dashboard stats fetched successfully",
+        data
+    });
+});
 export const assignSupervisor = asyncHandler(async (req, res, next) => { });
-export const getDashBoardStats = asyncHandler(async (req, res, next) => { });

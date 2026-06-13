@@ -9,6 +9,7 @@ import authRoutes from './routes/userRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
 import studentRoutes from './routes/studentRoutes.js';
 import notificationRoutes from './routes/notificationRoutes.js';
+import projectRoutes from './routes/projectRoutes.js';
 import { fileURLToPath } from 'url';
 import path from 'path';
 import fs from 'fs';
@@ -54,6 +55,7 @@ app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/admin", adminRoutes);
 app.use("/api/v1/student", studentRoutes);
 app.use("/api/v1/notification", notificationRoutes);
+app.use("/api/v1/project", projectRoutes);
 app.use(errorMiddleware);
 
 

@@ -53,6 +53,7 @@ const FeedbackPage = () => {
   useEffect(() => {
     dispatch(fetchProject());
   }, [dispatch]);
+
   useEffect(() => {
     if (project?._id) dispatch(getFeedBack(project._id));
   }, [dispatch, project?._id]);
@@ -200,10 +201,16 @@ const FeedbackPage = () => {
                           {fmt(fb.createdAt)}
                         </div>
                       )}
-                      {fb.supervisorId?.name && (
+                      {fb.supervisorName && (
                         <div className="flex items-center gap-1.5 text-xs text-slate-400">
                           <User className="w-3.5 h-3.5" />
-                          {fb.supervisorId.name}
+                          {fb.supervisorName}
+                        </div>
+                      )}
+                      {fb.supervisorEmail && (
+                        <div className="flex items-center gap-1.5 text-xs text-slate-400">
+                          <Mail className="w-3.5 h-3.5" />
+                          {fb.supervisorEmail}
                         </div>
                       )}
                     </div>

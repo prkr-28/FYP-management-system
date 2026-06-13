@@ -1,5 +1,34 @@
 import mongoose from "mongoose";
 
+const feedbackSchema = new mongoose.Schema(
+    {
+        supervisorId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
+            required: true,
+        },
+        type: {
+            type: String,
+            enum: ["positive", "negative", "general"],
+            default: "general",
+        },
+        title: {
+            type: String,
+            required: true,
+            trim: true,
+        },
+        message: {
+            type: String,
+            required: true,
+            trim: true,
+            maxlength: [1000, "Feedback message cannot exceed 1000 characters"],
+        },
+    },
+    {
+        timestamps: true, // adds createdAt and updatedAt to each feedback entry
+    }
+);
+
 const projectSchema = new mongoose.Schema(
     {
         student: {
@@ -43,7 +72,7 @@ const projectSchema = new mongoose.Schema(
                     type: String,
                     required: true,
                 },
-                size: {                   // FIX: was missing from schema, added
+                size: {
                     type: Number,
                     default: 0,
                 },
@@ -53,30 +82,7 @@ const projectSchema = new mongoose.Schema(
                 },
             }
         ],
-        feedback: [
-            {
-                supervisorId: {
-                    type: mongoose.Schema.Types.ObjectId,
-                    ref: "User",
-                    required: true,
-                },
-                type: {
-                    type: String,
-                    enum: ["positive", "negative", "general"],
-                    default: "general",
-                },
-                title: {
-                    type: String,
-                    required: true,
-                },
-                message: {
-                    type: String,
-                    required: true,
-                    trim: true,
-                    maxlength: [1000, "Feedback message cannot exceed 1000 characters"],
-                },
-            }
-        ],
+        feedback: [feedbackSchema],
         deadline: {
             type: Date,
             default: null,
@@ -87,7 +93,6 @@ const projectSchema = new mongoose.Schema(
     }
 );
 
-//indexing for better query performance
 projectSchema.index({ student: 1 });
 projectSchema.index({ supervisor: 1 });
 projectSchema.index({ status: 1 });

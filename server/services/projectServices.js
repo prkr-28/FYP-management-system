@@ -7,7 +7,7 @@ export const getProjectByStudentId = async (studentId) => {
 };
 
 export const getProjectById = async (projectId) => {
-    const project = await Project.findById(projectId).populate("student", "name email").populate("supervisor", "name email");
+    const project = await Project.findById(projectId).populate("student", "name email").populate("supervisor", "name email").populate("feedback.supervisorId", "name email");
     if (!project) {
         throw new ErrorHandler("Project not found", 404);
     }
@@ -37,6 +37,6 @@ export const addFilesToProject = async (projectId, files) => {
 };
 
 export const getAllProjects = async () => {
-    const projects = await Project.find();
+    const projects = await Project.find().populate("student", "name email").populate("supervisor", "name email").populate("feedback.supervisorId", "name email").sort({ createdAt: -1 })
     return projects;
 };
