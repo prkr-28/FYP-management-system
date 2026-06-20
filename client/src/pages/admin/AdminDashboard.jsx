@@ -34,6 +34,7 @@ import {
   toggleStudentModel,
   toggleTeacherModel,
 } from "../../store/slices/popupSlice.js";
+import { axiosInstance } from "../../lib/axios.js";
 
 const AdminDashboard = () => {
   const { isCreateStudentModelOpen, isCreateTeacherModelOpen } = useSelector(
@@ -74,6 +75,7 @@ const AdminDashboard = () => {
         studentName: p.student?.name,
         originalName: f.originalName,
         uploadedAt: f.uploadedAt,
+        fileId: f._id,
       })),
     );
   }, [projects]);
@@ -85,19 +87,51 @@ const AdminDashboard = () => {
       f.studentName.toLowerCase().includes(reportSearch.toLowerCase()),
   );
 
+  console.log(filteredFiles);
+
   const handleDownload = async ({ projectId, fileId, name }) => {
-    const res = await dispatch(downloadFile({ projectId, fileId }));
-    if (res.error) {
-      toast.error(res.error.message || "Failed to download file");
-      return;
+    try {
+      const res = await axiosInstance.get(
+        `/project/${projectId}/files/${fileId}/download`,
+        {
+          responseType: "blob",
+        },
+      );
+
+      // If server returned an error JSON wrapped as blob, parse and show it
+      if (res.data.type === "application/json") {
+        const text = await res.data.text();
+        const err = JSON.parse(text);
+        toast.error(err.message || "Download failed.");
+        return;
+      }
+
+      const url = URL.createObjectURL(res.data);
+      const a = Object.assign(document.createElement("a"), {
+        href: url,
+        download: file.originalName || "downloaded_file",
+      });
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      toast.success(`"${file.originalName}" downloaded successfully.`);
+    } catch (err) {
+      // Axios error with blob response — try to parse the JSON error body
+      if (err.response?.data instanceof Blob) {
+        try {
+          const text = await err.response.data.text();
+          const parsed = JSON.parse(text);
+          toast.error(parsed.message || "Download failed.");
+        } catch {
+          toast.error("Download failed. Please try again.");
+        }
+      } else {
+        toast.error(
+          err.response?.data?.message || "Download failed. Please try again.",
+        );
+      }
     }
-    const url = window.URL.createObjectURL(new Blob([res.payload.blob]));
-    const link = document.createElement("a");
-    link.href = url;
-    link.setAttribute("download", name);
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
   };
 
   const supervisorsBucket = useMemo(() => {
@@ -453,7 +487,7 @@ const AdminDashboard = () => {
                             onClick={() =>
                               handleDownload({
                                 projectId: f.projectId,
-                                fileId: f._id,
+                                fileId: f.fileId,
                                 name: f.originalName,
                               })
                             }
@@ -467,6 +501,9 @@ const AdminDashboard = () => {
             </div>
           </div>
         )}
+
+        {isCreateStudentModelOpen && <AddStudent />}
+        {isCreateTeacherModelOpen && <AddTeacher />}
       </div>
     </>
   );
