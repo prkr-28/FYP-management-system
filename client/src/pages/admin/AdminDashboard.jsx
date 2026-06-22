@@ -109,13 +109,13 @@ const AdminDashboard = () => {
       const url = URL.createObjectURL(res.data);
       const a = Object.assign(document.createElement("a"), {
         href: url,
-        download: file.originalName || "downloaded_file",
+        download: name || "downloaded_file",
       });
       document.body.appendChild(a);
       a.click();
       a.remove();
       URL.revokeObjectURL(url);
-      toast.success(`"${file.originalName}" downloaded successfully.`);
+      toast.success(`"${name}" downloaded successfully.`);
     } catch (err) {
       // Axios error with blob response — try to parse the JSON error body
       if (err.response?.data instanceof Blob) {
